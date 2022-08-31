@@ -44,7 +44,7 @@ for item in check_list:
         config.read_dict({item["cfg"][0]: {item["cfg"][1]: value}})
 
 # redis
-redis = NodeRedis(config["Redis"]).new_redis()
+redis_db = NodeRedis(config["Redis"]).new_redis()
 
 
 # SQL DB
