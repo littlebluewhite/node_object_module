@@ -1,8 +1,8 @@
-from app_node_object.node_object_SQL.database import SessionLocal
+from node_object_main import db_session
 
 
 def get_db():
-    db = SessionLocal()
+    db = db_session()
     try:
         yield db
     finally:

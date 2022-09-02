@@ -1,21 +1,13 @@
-import sys
-
-py_v = sys.version_info
-if py_v.major > 3 and py_v.minor > 9:
-    from typing import Optional
-    l = list
-else:
-    from typing import Optional, List
-    l = List
+from typing import Optional
 
 from fastapi import Query, Depends
 
-from app_node_object.node_object_function import search_function
+from node_object_function import search_function
 
 
-async def common_search(_range: Optional[l[str]] = Query(None),
-                        _value_in: Optional[l[str]] = Query(None),
-                        _json_in: Optional[l[str]] = Query(None)):
+async def common_search(_range: Optional[list[str]] = Query(None),
+                        _value_in: Optional[list[str]] = Query(None),
+                        _json_in: Optional[list[str]] = Query(None)):
     if not _range and not _value_in and not _json_in:
         return None
     else:

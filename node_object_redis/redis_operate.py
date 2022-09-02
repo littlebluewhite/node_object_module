@@ -7,9 +7,9 @@ from fastapi.encoders import jsonable_encoder
 
 
 class RedisOperate:
-    def __init__(self, redis_db: redis.Redis, exception):
+    def __init__(self, redis_db: redis.Redis, exc):
         self.redis = redis_db
-        self.exc = exception
+        self.exc = exc
 
     def clean_redis_by_name(self, table_name):
         if self.redis.exists(table_name):
