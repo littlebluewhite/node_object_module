@@ -29,13 +29,15 @@ class SQLOperate:
             elif code == 1062:
                 raise self.exc(status_code=403, detail=msg)
 
-    def get_sql_data(self, db: Session, id_set: set, sql_model) -> list:
-        data_list = db.query(sql_model).filter(sql_model.id.in_(id_set)).all()
-        if not data_list:
-            raise self.exc(status_code=404, detail=f"one or more id are not in {id_set}")
+    def get_sql_data(self, db: Session, sql_model, field_value_set: set,
+                     sql_field: str = "id", check_data_list: bool = True) -> list:
+        data_list = db.query(sql_model).filter(getattr(sql_model, sql_field).in_(field_value_set)).all()
+        if not data_list and check_data_list:
+            raise self.exc(status_code=404, detail=f"one or more {sql_field} value are not in {field_value_set}")
         return data_list
-    
-    def get_all_sql_data(self, db: Session, sql_model):
+
+    @staticmethod
+    def get_all_sql_data(db: Session, sql_model):
         skip: int = 0
         limit: int = 100
         result = list()
@@ -66,7 +68,7 @@ class SQLOperate:
             elif code == 1406:
                 raise self.exc(status_code=403, detail=msg)
 
-    def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model):
+    def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model) -> list:
         try:
             delete_data_list = db.query(sql_model).filter(sql_model.id.in_(id_set)).all()
             if len(id_set) != len(delete_data_list):

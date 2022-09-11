@@ -6,10 +6,16 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import node_object_data.node
+import node_object_data.node_base
+import node_object_data.device_info
+import node_object_data.third_dimension_instance
+import node_object_data.node_group
 from node_object_SQL import models
 from node_object_SQL.database import SQLDB
 from node_object_exception import NodeObjectException
 from node_object_redis.redis import NodeRedis
+from routers.General_table_router import GeneralRouter
 
 node_object_app = FastAPI(title="node_object_app")
 
@@ -57,6 +63,18 @@ db_session = db.new_db_session()
 
 
 # router
+node_object_app.include_router(GeneralRouter(node_object_data.node, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.node_base, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.device_info, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.third_dimension_instance, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.node_group, redis_db,
+                                             NodeObjectException, db_session).create())
+
+
 @node_object_app.exception_handler(NodeObjectException)
 async def unicorn_exception_handler(request: Request, exc: NodeObjectException):
     return JSONResponse(

@@ -51,7 +51,7 @@ class Node(Base):
     node_base = relationship("NodeBase", lazy="joined")
     child_nodes = relationship("Node",
                                lazy="joined",
-                               join_depth=30)
+                               join_depth=11)
     third_dimension_instance = relationship("ThirdDimensionInstance", back_populates="node", lazy="joined")
     objects = relationship("Object", back_populates="node", lazy="joined")
     node_groups = relationship("NodeGroup", back_populates="nodes",
@@ -95,16 +95,16 @@ class ThirdDimensionInstance(Base):
     __tablename__ = "third_dimension_instance"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    streaming_url = Column(String(256), default=None)  # 該節點的影像串流位置(可能是CCTV或複合式設備)
-    image_url = Column(String(256), default=None)  # 該節點的影片路徑、網址
-    area = Column(String(256), default=None)  # 描述節點所屬樓層、區域
-    floor = Column(String(256), default=None)  # 描述節點所屬樓層
+    streaming_url = Column(String(256))  # 該節點的影像串流位置(可能是CCTV或複合式設備)
+    image_url = Column(String(256))  # 該節點的影片路徑、網址
+    area = Column(String(256))  # 描述節點所屬樓層、區域
+    floor = Column(String(256))  # 描述節點所屬樓層
     position = Column(JSON)  # {"x":0.0,"y":0.0,"z":0.0} 節點世界座標
     rotation = Column(JSON)  # {"x":0.0,"y":0.0,"z":0.0} 節點旋轉Euler角(0.0~360.0)
     scale = Column(JSON)  # {"x":0.0,"y":0.0,"z":0.0} 節點縮放大小
-    model_url = Column(String(256), default=None)  # 節點的模型路徑 TODO 目前是第一版先以本地路徑、第二版是結合後端的FileSys指向雲端的路徑
-    location_path = Column(String(256), default=None)  # 階層路徑 (或是用ParentId, 可為空<root>)
-    layer_id = Column(Integer, default=0)  # 節點定義層級 (Building/Floor/Room/Device/Pipe/Sensor) TODO 也許透過 Node 概念來解決?
+    model_url = Column(String(256))  # 節點的模型路徑 TODO 目前是第一版先以本地路徑、第二版是結合後端的FileSys指向雲端的路徑
+    location_path = Column(String(256))  # 階層路徑 (或是用ParentId, 可為空<root>)
+    layer_id = Column(Integer)  # 節點定義層級 (Building/Floor/Room/Device/Pipe/Sensor) TODO 也許透過 Node 概念來解決?
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
@@ -119,7 +119,7 @@ class DeviceInfo(Base):
     name = Column(String(256))  # 節點資訊名稱
     company = Column(String(256))  # 節點廠商
     contact_name = Column(String(256))  # 節點聯絡人
-    phone_number = Column(Integer)  # 節點廠商連絡電話
+    phone_number = Column(String(256))  # 節點廠商連絡電話
     email = Column(String(256))  # 節點廠商連絡電子郵件
 
 
@@ -175,7 +175,7 @@ class ObjectTemplate(Base):
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    node_template = relationship("NodeTemplate", back_populates="objectTemplates")
+    node_template = relationship("NodeTemplate", back_populates="object_templates")
     control_href_group_template = relationship("ControlHrefGroupTemplate", back_populates="object_template",
                                                lazy="immediate", uselist=False)
     fake_data_config_template = relationship("FakeDataConfigTemplate", back_populates="object_template",
@@ -236,7 +236,7 @@ class ControlHrefItem(Base):
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    control_href = relationship("ControlHrefGroup", back_populates="control_href_items", lazy="immediate")
+    control_href_group = relationship("ControlHrefGroup", back_populates="control_href_items", lazy="immediate")
 
 
 class ControlHrefItemTemplate(Base):
@@ -250,8 +250,9 @@ class ControlHrefItemTemplate(Base):
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    control_href = relationship("ControlHrefGroupTemplate", back_populates="control_href_item_templates",
-                                lazy="immediate")
+    control_href_group_template = relationship("ControlHrefGroupTemplate",
+                                               back_populates="control_href_item_templates",
+                                               lazy="immediate")
 
 
 # 假資料設定檔
@@ -277,7 +278,7 @@ class FakeDataConfig(Base):
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
-    object = relationship("Object", back_populates="object", lazy="immediate")
+    object = relationship("Object", back_populates="fake_data_config", lazy="immediate")
 
 
 class FakeDataConfigTemplate(Base):
@@ -290,4 +291,4 @@ class FakeDataConfigTemplate(Base):
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
-    object_template = relationship("ObjectTemplate", back_populates="object_template", lazy="immediate")
+    object_template = relationship("ObjectTemplate", back_populates="fake_data_config_template", lazy="immediate")

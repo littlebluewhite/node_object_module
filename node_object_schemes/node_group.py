@@ -2,23 +2,12 @@ import datetime
 
 from pydantic import BaseModel
 
-import node_object_schemes.third_dimension_instance
 import node_object_schemes.node_base
+import node_object_schemes.third_dimension_instance
 
 
-class NodeGroup(BaseModel):
-    id: str
-    name: str
-    is_topics: bool = True
-    description: str
-
-    update_at: datetime.datetime
-
-    class Config:
-        orm_mode = True
-
-
-class NodeBasic(BaseModel):
+class Node(BaseModel):
+    id: int
     node_id: str
     name: str
     principal_name: str | None = None
@@ -27,11 +16,6 @@ class NodeBasic(BaseModel):
     tags: list[str] = list()
     parent_node_id: int | None = None
     third_dimension_instance_id: int | None = None
-
-
-class Node(NodeBasic):
-    id: int
-
     node_base_id: int | None = None
     create_at: datetime.datetime
     update_at: datetime.datetime
@@ -39,22 +23,36 @@ class Node(NodeBasic):
     node_base: node_object_schemes.node_base.NodeBase | None = None
     child_nodes: list = list()
     third_dimension_instance: node_object_schemes.third_dimension_instance.ThirdDimensionInstance | None = None
-    node_groups: list[NodeGroup] = list()
 
     class Config:
         orm_mode = True
 
 
-class NodeCreate(NodeBasic):
+class NodeGroupBasic(BaseModel):
+    name: str
+    is_topics: bool = True
+    description: str
+
+
+class NodeGroup(NodeGroupBasic):
+    id: str
+    update_at: datetime.datetime
+
+    nodes: list[Node] = list()
+
+    class Config:
+        orm_mode = True
+
+
+class NodeGroupCreate(NodeGroupBasic):
     pass
 
 
-class NodeUpdate(NodeBasic):
-    node_id: str | None = None
+class NodeGroupUpdate(NodeGroupBasic):
     name: str | None = None
-    tags: list[str] | None = None
-    node_base_id: int | None = None
+    is_topics: bool | None = None
+    description: str | None = None
 
 
-class NodeMultipleUpdate(NodeUpdate):
-    id: int
+class NodeGroupMultipleUpdate(NodeGroupBasic):
+    id: str

@@ -19,7 +19,7 @@ class SQLDB:
         return self.engine
 
     def new_db_session(self):
-        return sessionmaker(autocommit=False, autoflush=False, bind=self.engine)()
+        return sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
 
 Base = declarative_base()
