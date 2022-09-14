@@ -7,7 +7,6 @@ class NodeBaseBasic(BaseModel):
     description: str
     value: str
     node_type: str
-    device_info_id: int
 
 
 class NodeBase(NodeBaseBasic):
@@ -27,7 +26,6 @@ class NodeBaseUpdate(NodeBaseBasic):
     description: str | None = None
     value: str | None = None
     node_type: str | None = None
-    device_info_id: int | None = None
 
 
 class NodeBaseMultipleUpdate(NodeBaseUpdate):

@@ -1,21 +1,23 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, DateTime, Table, Float
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, DateTime, Float
 from sqlalchemy.orm import relationship
 
 from node_object_SQL.database import Base
 
-node_node_group = \
-    Table('node_node_group', Base.metadata,
-          Column('node_id', Integer, ForeignKey('node.id')),
-          Column('node_group_id', Integer, ForeignKey('node_group.id'))
-          )
 
-object_object_group = \
-    Table('object_object_group', Base.metadata,
-          Column('object_id', Integer, ForeignKey('object.id')),
-          Column('object_group_id', Integer, ForeignKey('object_group.id'))
-          )
+class NodeNodeGroup(Base):
+    __tablename__ = "node_node_group"
+
+    node_id = Column('node_id', Integer, ForeignKey('node.id'), primary_key=True)
+    node_group_id = Column('node_group_id', Integer, ForeignKey('node_group.id'), primary_key=True)
+
+
+class ObjectObjectGroup(Base):
+    __tablename__ = "object_object_group"
+
+    object_id = Column('object_id', Integer, ForeignKey('object.id'), primary_key=True)
+    object_group_id = Column('object_group_id', Integer, ForeignKey('object_group.id'), primary_key=True)
 
 
 class NodeBase(Base):
@@ -25,7 +27,6 @@ class NodeBase(Base):
     description = Column(String(256))  # 節點文字描述
     value = Column(String(256))
     node_type = Column(String(256), default=None)  # 節點資訊id，表示該節點對應到的資訊，用以反向查詢該節點的資訊索引
-    device_info_id = Column(Integer, ForeignKey("device_info.id"), unique=True)
 
     device_info = relationship("DeviceInfo", lazy="joined")
 
@@ -43,19 +44,17 @@ class Node(Base):
     tags = Column(JSON)  # 節點標籤
     parent_node_id = Column(Integer, ForeignKey("node.id"))
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
-    third_dimension_instance_id = Column(Integer, ForeignKey("third_dimension_instance.id"), unique=True)
 
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    node_base = relationship("NodeBase", lazy="joined")
+    node_base = relationship("NodeBase", lazy="joined", uselist=False)
     child_nodes = relationship("Node",
                                lazy="joined",
-                               join_depth=11)
-    third_dimension_instance = relationship("ThirdDimensionInstance", back_populates="node", lazy="joined")
+                               join_depth=5)
+    third_dimension_instance = relationship("ThirdDimensionInstance", lazy="joined", uselist=False)
     objects = relationship("Object", back_populates="node", lazy="joined")
-    node_groups = relationship("NodeGroup", back_populates="nodes",
-                               secondary=node_node_group)  # 節點所屬的節點群組，這是一張列表，表示這個點為可能屬於多個節點群組
+    node_groups = relationship("NodeNodeGroup", lazy="joined")  # 節點所屬的節點群組，這是一張列表，表示這個點為可能屬於多個節點群組
 
 
 class NodeTemplate(Base):
@@ -69,11 +68,11 @@ class NodeTemplate(Base):
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    node_base = relationship("NodeBase", lazy="joined")
+    node_base = relationship("NodeBase", lazy="joined", uselist=False)
     child_node_templates = relationship("Node",
                                         lazy="joined",
                                         join_depth=30)
-    object_templates = relationship("ObjectTemplate", back_populates="node_template", lazy="joined")
+    object_templates = relationship("ObjectTemplate", lazy="joined")
 
 
 # 節點群組
@@ -87,7 +86,7 @@ class NodeGroup(Base):
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    nodes = relationship("Node", back_populates="node_groups", secondary=node_node_group)
+    nodes = relationship("NodeNodeGroup", lazy="joined")
 
 
 # 3D物件
@@ -106,9 +105,9 @@ class ThirdDimensionInstance(Base):
     location_path = Column(String(256))  # 階層路徑 (或是用ParentId, 可為空<root>)
     layer_id = Column(Integer)  # 節點定義層級 (Building/Floor/Room/Device/Pipe/Sensor) TODO 也許透過 Node 概念來解決?
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    node_id = Column(Integer, ForeignKey("node.id"), unique=True)
 
-    node = relationship("Node", back_populates="third_dimension_instance", lazy="joined", uselist=False)
+    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
 
 # 節點資訊
@@ -121,6 +120,8 @@ class DeviceInfo(Base):
     contact_name = Column(String(256))  # 節點聯絡人
     phone_number = Column(String(256))  # 節點廠商連絡電話
     email = Column(String(256))  # 節點廠商連絡電子郵件
+
+    node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 
 
 class ObjectBase(Base):
@@ -147,18 +148,18 @@ class Object(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256))  # 點位(物件)名稱
     object_base_id = Column(Integer, ForeignKey("object_base.id"), unique=True)
-    fake_data_config_id = Column(Integer, ForeignKey("fake_data_config.id"), unique=True)  # 點位(物件)所屬的假資料設定Id
     node_id = Column(Integer, ForeignKey("node.id"), unique=True)  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"
-    control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"), unique=True)  # 點位(物件)控制選像
     tags = Column(JSON, default=list())
+    control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"))
 
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     node = relationship("Node", back_populates="objects", lazy="immediate", uselist=False)
-    object_groups = relationship("ObjectGroup", back_populates="objects", secondary=object_object_group)
-    control_href_group = relationship("ControlHrefGroup", back_populates="object", lazy="immediate", uselist=False)
-    fake_data_config = relationship("FakeDataConfig", back_populates="object", lazy="immediate", uselist=False)
+    object_base = relationship("ObjectBase", lazy="immediate", uselist=False)
+    object_groups = relationship("ObjectObjectGroup", lazy="joined")
+    control_href_group = relationship("ControlHrefGroup", lazy="immediate", uselist=False)
+    fake_data_config = relationship("FakeDataConfig", lazy="immediate", uselist=False)
 
 
 class ObjectTemplate(Base):
@@ -168,18 +169,14 @@ class ObjectTemplate(Base):
     name = Column(String(256))  # 點位(物件)名稱
     object_base_id = Column(Integer, ForeignKey("object_base.id"), unique=True)
     # 點位(物件)所屬的假資料設定Id
-    fake_data_config_template_id = Column(Integer, ForeignKey("fake_data_config_template.id"), unique=True)
     node_template_id = Column(Integer, ForeignKey("node_template.id"), unique=True)  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"
-    # 點位(物件)控制選像
-    control_href_group_template_id = Column(Integer, ForeignKey("control_href_group_template.id"), unique=True)
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    node_template = relationship("NodeTemplate", back_populates="object_templates")
-    control_href_group_template = relationship("ControlHrefGroupTemplate", back_populates="object_template",
-                                               lazy="immediate", uselist=False)
-    fake_data_config_template = relationship("FakeDataConfigTemplate", back_populates="object_template",
-                                             lazy="immediate", uselist=False)
+    object_base = relationship("ObjectBase", lazy="joined", uselist=False)
+    # 點位(物件)控制選像
+    control_href_group_template = relationship("ControlHrefGroupTemplate", lazy="immediate", uselist=False)
+    fake_data_config_template = relationship("FakeDataConfigTemplate", lazy="immediate", uselist=False)
 
 
 # 物件群組
@@ -193,7 +190,7 @@ class ObjectGroup(Base):
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    objects = relationship("Object", back_populates="object_groups", secondary=object_object_group)
+    objects = relationship("ObjectObjectGroup", lazy="joined")
 
 
 # 控制選項列表
@@ -202,12 +199,12 @@ class ControlHrefGroup(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256))  # 控制選項列表名稱
+    tags = Column(JSON)  # 節點標籤
 
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     control_href_items = relationship("ControlHrefItem", back_populates="control_href_group", lazy="immediate")  # 控制選項
-    object = relationship("Object", back_populates="control_href_group", lazy="immediate", uselist=False)
 
 
 class ControlHrefGroupTemplate(Base):
@@ -216,11 +213,12 @@ class ControlHrefGroupTemplate(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256))  # 控制選項列表名稱
 
+    object_template_id = Column(Integer, ForeignKey("object_template.id"), unique=True)
+
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     control_href_item_templates = relationship("ControlHrefItemTemplate", back_populates="control_href_group_template",
                                                lazy="immediate")  # 控制選項
-    object_template = relationship("ObjectTemplate", back_populates="control_href_group_template", lazy="immediate")
 
 
 # 控制選項
@@ -232,6 +230,7 @@ class ControlHrefItem(Base):
     control_data = Column(String(256))  # 控制選項所帶的參數，可能是URL、後端的某個命令、參數等等
     color = Column(String(256))  # 選項自帶的色票
     control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"))  # 控制選項
+    tags = Column(JSON)  # 節點標籤
 
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
@@ -273,12 +272,12 @@ class FakeDataConfig(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256))  # 假資料設定檔名稱
     fake_data_config_base_id = Column(Integer, ForeignKey("fake_data_config_base.id"), unique=True)
+    object_id = Column(Integer, ForeignKey("object.id"), unique=True)
 
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
-    object = relationship("Object", back_populates="fake_data_config", lazy="immediate")
 
 
 class FakeDataConfigTemplate(Base):
@@ -287,8 +286,8 @@ class FakeDataConfigTemplate(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256))  # 假資料設定檔名稱
     fake_data_config_base_id = Column(Integer, ForeignKey("fake_data_config_base.id"), unique=True)
+    object_template_id = Column(Integer, ForeignKey("object_template.id"), unique=True)
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
-    object_template = relationship("ObjectTemplate", back_populates="fake_data_config_template", lazy="immediate")

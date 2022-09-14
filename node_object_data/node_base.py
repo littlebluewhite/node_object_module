@@ -1,4 +1,5 @@
 import node_object_data.node
+import node_object_data.node_template
 import node_object_schemes.node_base
 from node_object_SQL import models
 
@@ -18,6 +19,7 @@ reload_related_redis_tables = {
         ],
     "outside_field":
         [
-            {"module": node_object_data.node, "field": "node_base_id"}
+            {"module": node_object_data.node, "field": "node_base_id"},
+            {"module": node_object_data.node_template, "field": "node_template_id"},
         ]
 }

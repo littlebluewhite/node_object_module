@@ -1,4 +1,3 @@
-import base64
 import json
 from typing import Any
 
@@ -35,8 +34,8 @@ class RedisOperate:
             update_dict[update_data.id] = update_data
         result: list[Any] = list()
         for sql_data in sql_data_list:
-            row = schemas_model(**jsonable_encoder(sql_data, custom_encoder={
-                bytes: lambda v: base64.b64encode(v).decode('utf-8')}))
+            print(sql_data)
+            row = schemas_model(**jsonable_encoder(sql_data))
             # 寫入主表
             if key == "id":
                 value = row.json()

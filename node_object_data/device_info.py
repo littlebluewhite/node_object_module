@@ -13,11 +13,11 @@ update_schemas = node_object_schemes.device_info.DeviceInfoUpdate
 multiple_update_schemas = node_object_schemes.device_info.DeviceInfoMultipleUpdate
 
 reload_related_redis_tables = {
-    "self_field":
-        [
-        ],
     "outside_field":
         [
-            {"module": node_object_data.node_base, "field": "device_info_id"}
+        ],
+    "self_field":
+        [
+            {"module": node_object_data.node_base, "field": "node_base_id"}
         ]
 }

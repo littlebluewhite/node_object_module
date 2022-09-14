@@ -14,6 +14,7 @@ class ThirdDimensionInstanceBasic(BaseModel):
     model_url: str | None = None
     location_path: str | None = None
     layer_id: int | None = None
+    node_id: int | None = None
 
 
 class ThirdDimensionInstance(ThirdDimensionInstanceBasic):

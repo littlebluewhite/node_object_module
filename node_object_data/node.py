@@ -11,4 +11,5 @@ create_schemas = node_object_schemes.node.NodeCreate
 update_schemas = node_object_schemes.node.NodeUpdate
 multiple_update_schemas = node_object_schemes.node.NodeMultipleUpdate
 
-reload_related_redis_tables = {}
+reload_related_redis_tables = {
+}

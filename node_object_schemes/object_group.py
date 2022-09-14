@@ -1,0 +1,41 @@
+import datetime
+
+from pydantic import BaseModel
+
+
+class ObjectObjectGroup(BaseModel):
+    object_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class ObjectGroupBasic(BaseModel):
+    name: str
+    is_topic: bool = True
+    description: str | None = None
+
+
+class ObjectGroup(ObjectGroupBasic):
+    id: str
+    is_topic: bool
+
+    objects: list[ObjectObjectGroup] = list()
+
+    update_at: datetime.datetime
+
+    class Config:
+        orm_mode = True
+
+
+class ObjectGroupCreate(ObjectGroupBasic):
+    pass
+
+
+class ObjectGroupUpdate(ObjectGroupBasic):
+    name: str | None = None
+    is_topic: bool | None = None
+
+
+class ObjectGroupMultipleUpdate(ObjectGroupUpdate):
+    id: int

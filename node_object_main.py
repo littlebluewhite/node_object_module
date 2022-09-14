@@ -11,6 +11,21 @@ import node_object_data.node_base
 import node_object_data.device_info
 import node_object_data.third_dimension_instance
 import node_object_data.node_group
+import node_object_data.node_node_group
+import node_object_data.object
+import node_object_data.object_group
+import node_object_data.object_object_group
+import node_object_data.object_base
+import node_object_data.control_href_group
+import node_object_data.control_href_item
+import node_object_data.fake_data_config
+import node_object_data.fake_data_config_base
+import node_object_data.node_template
+import node_object_data.object_template
+import node_object_data.control_href_group_template
+import node_object_data.control_href_item_template
+import node_object_data.fake_data_config_template
+
 from node_object_SQL import models
 from node_object_SQL.database import SQLDB
 from node_object_exception import NodeObjectException
@@ -52,7 +67,6 @@ for item in check_list:
 # redis
 redis_db = NodeRedis(config["Redis"]).new_redis()
 
-
 # SQL DB
 db = SQLDB(config["SQLDB"])
 #   create SQL models
@@ -60,7 +74,6 @@ models.Base.metadata.create_all(bind=db.get_engine())
 
 #   create SQL session
 db_session = db.new_db_session()
-
 
 # router
 node_object_app.include_router(GeneralRouter(node_object_data.node, redis_db,
@@ -72,6 +85,34 @@ node_object_app.include_router(GeneralRouter(node_object_data.device_info, redis
 node_object_app.include_router(GeneralRouter(node_object_data.third_dimension_instance, redis_db,
                                              NodeObjectException, db_session).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node_group, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.node_node_group, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.object, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.object_base, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.object_group, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.object_object_group, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.control_href_group, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.control_href_item, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.fake_data_config, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.fake_data_config_base, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.node_template, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.object_template, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.control_href_group_template, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.control_href_item_template, redis_db,
+                                             NodeObjectException, db_session).create())
+node_object_app.include_router(GeneralRouter(node_object_data.fake_data_config_template, redis_db,
                                              NodeObjectException, db_session).create())
 
 

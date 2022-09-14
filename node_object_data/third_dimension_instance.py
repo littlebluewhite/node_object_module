@@ -13,11 +13,11 @@ update_schemas = node_object_schemes.third_dimension_instance.ThirdDimensionInst
 multiple_update_schemas = node_object_schemes.third_dimension_instance.ThirdDimensionInstanceMultipleUpdate
 
 reload_related_redis_tables = {
-    "self_field":
-        [
-        ],
     "outside_field":
         [
-            {"module": node_object_data.node, "field": "third_dimension_instance_id"}
+        ],
+    "self_field":
+        [
+            {"module": node_object_data.node, "field": "node_id"}
         ]
 }
