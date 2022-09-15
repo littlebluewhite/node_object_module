@@ -14,6 +14,13 @@ class NodeNodeGroup(BaseModel):
         orm_mode = True
 
 
+class ChildNode(BaseModel):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 class NodeBasic(BaseModel):
     node_id: str
     name: str
@@ -33,7 +40,7 @@ class Node(NodeBasic):
     update_at: datetime.datetime
 
     node_base: node_object_schemes.node_base.NodeBase | None = None
-    child_nodes: list = list()
+    child_nodes: list[ChildNode] = list()
     third_dimension_instance: node_object_schemes.third_dimension_instance.ThirdDimensionInstance | None = None
     node_groups: list[NodeNodeGroup] = list()
     objects: list[node_object_schemes.object.Object] = list()

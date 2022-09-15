@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 
 class ObjectBaseBasic(BaseModel):
-    object_id: str
     value: str | None = None
     unit: str | None = None
     description: str | None = None
@@ -29,7 +28,6 @@ class ObjectBaseCreate(ObjectBaseBasic):
 
 
 class ObjectBaseUpdate(ObjectBaseBasic):
-    object_id: str | None = None
     dec: int | None = None
     is_control: bool | None = None
 

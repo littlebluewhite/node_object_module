@@ -31,6 +31,7 @@ from node_object_SQL.database import SQLDB
 from node_object_exception import NodeObjectException
 from node_object_redis.redis import NodeRedis
 from routers.General_table_router import GeneralRouter
+from routers.API.api_node import NodeAPIRouter
 
 node_object_app = FastAPI(title="node_object_app")
 
@@ -76,6 +77,7 @@ models.Base.metadata.create_all(bind=db.get_engine())
 db_session = db.new_db_session()
 
 # router
+node_object_app.include_router(NodeAPIRouter(redis_db, NodeObjectException, db_session).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node, redis_db,
                                              NodeObjectException, db_session).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node_base, redis_db,

@@ -36,7 +36,7 @@ class Node(Base):
     __tablename__ = "node"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    node_id = Column(String(256))  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
+    node_id = Column(String(256), unique=True, nullable=False)  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
     name = Column(String(256))  # 節點名稱
     principal_name = Column(String(256))  # 節點負責人
     last_maintain_date = Column(DateTime)  # 節點最後維護時間
@@ -51,7 +51,7 @@ class Node(Base):
     node_base = relationship("NodeBase", lazy="joined", uselist=False)
     child_nodes = relationship("Node",
                                lazy="joined",
-                               join_depth=5)
+                               join_depth=2)
     third_dimension_instance = relationship("ThirdDimensionInstance", lazy="joined", uselist=False)
     objects = relationship("Object", back_populates="node", lazy="joined")
     node_groups = relationship("NodeNodeGroup", lazy="joined")  # 節點所屬的節點群組，這是一張列表，表示這個點為可能屬於多個節點群組
@@ -71,7 +71,7 @@ class NodeTemplate(Base):
     node_base = relationship("NodeBase", lazy="joined", uselist=False)
     child_node_templates = relationship("Node",
                                         lazy="joined",
-                                        join_depth=30)
+                                        join_depth=2)
     object_templates = relationship("ObjectTemplate", lazy="joined")
 
 
@@ -80,7 +80,7 @@ class NodeGroup(Base):
     __tablename__ = "node_group"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(256))  # 節點群組名稱
+    name = Column(String(256), nullable=False, unique=True)  # 節點群組名稱
     is_topics = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))
 
@@ -120,6 +120,7 @@ class DeviceInfo(Base):
     contact_name = Column(String(256))  # 節點聯絡人
     phone_number = Column(String(256))  # 節點廠商連絡電話
     email = Column(String(256))  # 節點廠商連絡電子郵件
+    extra_info = Column(String(256))
 
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 
@@ -128,7 +129,6 @@ class ObjectBase(Base):
     __tablename__ = "object_base"
 
     id = Column(Integer, primary_key=True, index=True)
-    object_id = Column(String(256))  # 這不是自身關聯，而是對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
     value = Column(String(256))  # 點位(物件)的值
     unit = Column(String(256))  # 點位(物件)的單位，可能是百分比、度C、攝氏、莫氏硬度、百帕...等等
     description = Column(String(256))  # 點位(物件)文字描述
@@ -146,6 +146,8 @@ class Object(Base):
     __tablename__ = "object"
 
     id = Column(Integer, primary_key=True, index=True)
+    # 這不是自身關聯，而是對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
+    object_id = Column(String(256), unique=True, nullable=False)
     name = Column(String(256))  # 點位(物件)名稱
     object_base_id = Column(Integer, ForeignKey("object_base.id"), unique=True)
     node_id = Column(Integer, ForeignKey("node.id"), unique=True)  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"
@@ -184,7 +186,7 @@ class ObjectGroup(Base):
     __tablename__ = "object_group"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256))  # 節點資訊名稱
+    name = Column(String(256), nullable=False, unique=True)  # 節點資訊名稱
     is_topics = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))  # 點位(物件)群組文字描述
 
@@ -198,7 +200,7 @@ class ControlHrefGroup(Base):
     __tablename__ = "control_href_group"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256))  # 控制選項列表名稱
+    name = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
     tags = Column(JSON)  # 節點標籤
 
     create_at = Column(DateTime, default=datetime.datetime.now)
@@ -211,7 +213,7 @@ class ControlHrefGroupTemplate(Base):
     __tablename__ = "control_href_group_template"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256))  # 控制選項列表名稱
+    name = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
 
     object_template_id = Column(Integer, ForeignKey("object_template.id"), unique=True)
 

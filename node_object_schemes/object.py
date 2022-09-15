@@ -16,6 +16,7 @@ class ObjectObjectGroup(BaseModel):
 
 class ObjectBasic(BaseModel):
     name: str
+    object_id: str
     object_base_id: int | None = None
     node_id: int | None = None
     control_href_group_id: int | None = None
@@ -43,6 +44,7 @@ class ObjectCreate(ObjectBasic):
 
 
 class ObjectUpdate(ObjectBasic):
+    object_id: str | None = None
     name: str | None = None
     tags: list[str] | None = None
 

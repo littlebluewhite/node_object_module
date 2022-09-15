@@ -5,9 +5,9 @@ from fastapi import Query, Depends
 from node_object_function import search_function
 
 
-async def common_search(_range: Optional[list[str]] = Query(None),
-                        _value_in: Optional[list[str]] = Query(None),
-                        _json_in: Optional[list[str]] = Query(None)):
+async def common_search(_range: list[str] | None = Query(None),
+                        _value_in: list[str] | None = Query(None),
+                        _json_in: list[str] | None = Query(None)):
     if not _range and not _value_in and not _json_in:
         return None
     else:
@@ -22,7 +22,8 @@ async def common_search(_range: Optional[list[str]] = Query(None),
 
 
 class CommonQuery:
-    def __init__(self, skip: int = Query(0), limit: int = Query(None), where_command: str = Depends(common_search)):
+    def __init__(self, skip: int = Query(0), limit: int = Query(None),
+                 where_command: str = Depends(common_search)):
         if where_command is not None:
             self.pattern = "search"
             self.where_command = where_command

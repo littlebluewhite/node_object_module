@@ -8,6 +8,7 @@ class DeviceInfoBasic(BaseModel):
     phone_number: str
     email: str
     node_base_id: int | None = None
+    extra_info: str | None = None
 
 
 class DeviceInfo(DeviceInfoBasic):

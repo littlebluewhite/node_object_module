@@ -77,7 +77,7 @@ class GeneralOperate(RedisOperate, SQLOperate):
     def read_all_data_from_redis(self, table_index: int = 0) -> list:
         return RedisOperate.read_redis_all_data(self, self.redis_tables[table_index]["name"])
 
-    def read_data_from_redis_by_key_set(self, key_set: set, table_index: int = 0) -> list[dict]:
+    def read_data_from_redis_by_key_set(self, key_set: set, table_index: int = 0) -> list:
         return RedisOperate.read_redis_data(self, self.redis_tables[table_index]["name"], key_set)
 
     def create_data(self, db: Session, data_list: list) -> list:
