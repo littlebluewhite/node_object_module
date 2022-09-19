@@ -28,7 +28,7 @@ class NodeBase(Base):
     value = Column(String(256))
     node_type = Column(String(256), default=None)  # 節點資訊id，表示該節點對應到的資訊，用以反向查詢該節點的資訊索引
 
-    device_info = relationship("DeviceInfo", lazy="joined")
+    device_info = relationship("DeviceInfo", lazy="joined", uselist=False)
 
 
 # 節點

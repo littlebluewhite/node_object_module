@@ -12,7 +12,7 @@ class NodeBaseBasic(BaseModel):
 class NodeBase(NodeBaseBasic):
     id: int
 
-    device_info: node_object_schemes.device_info.DeviceInfo
+    device_info: node_object_schemes.device_info.DeviceInfo | None = None
 
     class Config:
         orm_mode = True

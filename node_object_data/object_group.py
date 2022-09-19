@@ -6,7 +6,7 @@ name = "object_group"
 redis_tables = [
     {"name": name, "key": "id"},
 ]
-sql_model = models.DeviceInfo
+sql_model = models.ObjectGroup
 main_schemas = node_object_schemes.object_group.ObjectGroup
 create_schemas = node_object_schemes.object_group.ObjectGroupCreate
 update_schemas = node_object_schemes.object_group.ObjectGroupUpdate

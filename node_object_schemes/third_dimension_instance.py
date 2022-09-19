@@ -14,11 +14,11 @@ class ThirdDimensionInstanceBasic(BaseModel):
     model_url: str | None = None
     location_path: str | None = None
     layer_id: int | None = None
-    node_id: int | None = None
 
 
 class ThirdDimensionInstance(ThirdDimensionInstanceBasic):
     id: str
+    node_id: int | None = None
 
     update_at: datetime.datetime
 
@@ -27,11 +27,11 @@ class ThirdDimensionInstance(ThirdDimensionInstanceBasic):
 
 
 class ThirdDimensionInstanceCreate(ThirdDimensionInstanceBasic):
-    pass
+    node_id: int | None = None
 
 
 class ThirdDimensionInstanceUpdate(ThirdDimensionInstanceBasic):
-    pass
+    node_id: int | None = None
 
 
 class ThirdDimensionInstanceMultipleUpdate(ThirdDimensionInstanceUpdate):
