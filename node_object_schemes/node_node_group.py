@@ -7,6 +7,8 @@ class NodeNodeGroupBasic(BaseModel):
 
 
 class NodeNodeGroup(NodeNodeGroupBasic):
+    id: int
+
     class Config:
         orm_mode = True
 
@@ -21,4 +23,4 @@ class NodeNodeGroupUpdate(NodeNodeGroupBasic):
 
 
 class NodeNodeGroupMultipleUpdate(NodeNodeGroupUpdate):
-    pass
+    id: int

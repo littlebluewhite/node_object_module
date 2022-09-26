@@ -5,7 +5,9 @@ from node_object_SQL import models
 
 name = "object_object_group"
 redis_tables = [
-    # {"name": name, "key": "id"},
+    {"name": name, "key": "id"},
+    {"name": f"{name}_by_object_id", "key": "object_id"},
+    {"name": f"{name}_by_object_group_id", "key": "object_group_id"},
 ]
 sql_model = models.ObjectObjectGroup
 main_schemas = node_object_schemes.object_object_group.ObjectObjectGroup

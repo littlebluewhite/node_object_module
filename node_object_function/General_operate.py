@@ -45,12 +45,12 @@ class GeneralOperate(RedisOperate, SQLOperate):
                     if old_ref_id_set:
                         ref_id_set |= old_ref_id_set
                     # print("id_set: ", id_set)
-                    sql_data_list2 = self.reload_redis_from_sql(db, table["module"], ref_id_set)
+                    sql_data_list2 = self.__reload_redis_from_sql(db, table["module"], ref_id_set)
                     self.reload_redis_table(db, table["module"].reload_related_redis_tables, sql_data_list2)
             elif key == "outside_field":
                 for table in reload_related_redis_tables["outside_field"]:
                     id_set = {getattr(i, "id") for i in sql_data_list}
-                    sql_data_list2 = self.reload_redis_from_sql(db, table["module"], id_set, table["field"])
+                    sql_data_list2 = self.__reload_redis_from_sql(db, table["module"], id_set, table["field"])
                     self.reload_redis_table(db, table["module"].reload_related_redis_tables, sql_data_list2)
             elif key == "many2many":
                 for table in reload_related_redis_tables["many2many"]:
@@ -58,10 +58,10 @@ class GeneralOperate(RedisOperate, SQLOperate):
                     ref_id_set: set = self.get_many2many_ref_id(
                         db, {i.id for i in sql_data_list}).get(table["other_id_field"], set())
                     ref_id_set |= old_ref_id_set
-                    sql_data_list2 = self.reload_redis_from_sql(db, table["module"], ref_id_set, "id")
+                    sql_data_list2 = self.__reload_redis_from_sql(db, table["module"], ref_id_set, "id")
                     self.reload_redis_table(db, table["module"].reload_related_redis_tables, sql_data_list2)
 
-    def reload_redis_from_sql(self, db, module, field_value_set: set, sql_field: str = "id"):
+    def __reload_redis_from_sql(self, db, module, field_value_set: set, sql_field: str = "id"):
         sql_data_list: list = SQLOperate.get_sql_data(self, db, module.sql_model, field_value_set, sql_field, False)
         for table in module.redis_tables[:1]:
             RedisOperate.write_sql_data_to_redis(
@@ -81,11 +81,8 @@ class GeneralOperate(RedisOperate, SQLOperate):
         return RedisOperate.read_redis_data(self, self.redis_tables[table_index]["name"], key_set)
 
     def create_data(self, db: Session, data_list: list) -> list:
-        sql_data_list = SQLOperate.create_multiple_sql_data(self, db, data_list, self.sql_model)
-        for table in self.redis_tables:
-            RedisOperate.write_sql_data_to_redis(
-                self, table["name"], sql_data_list, self.main_schemas, table["key"]
-            )
+        sql_data_list = self.create_sql(db, data_list)
+        self.update_redis_table(sql_data_list)
         self.reload_redis_table(db, self.reload_related_redis_tables, sql_data_list)
         return sql_data_list
 
@@ -98,25 +95,20 @@ class GeneralOperate(RedisOperate, SQLOperate):
         # 合併ref_dict
         original_ref_id_dict = self_ref_id_dict | many_ref_id_dict
         # 刪除有關聯的redis資料
-        for table in self.redis_tables[1:]:
-            RedisOperate.delete_redis_data(
-                self, table["name"], original_data_list, self.main_schemas, table["key"], update_list
-            )
+        self.delete_redis_index_table(original_data_list, update_list)
         # 更新SQL
-        sql_data_list = SQLOperate.update_multiple_sql_data(self, db, update_list, self.sql_model)
+        sql_data_list = self.update_sql(db, update_list)
 
         # 重寫自身redis表
-        for table in self.redis_tables:
-            RedisOperate.write_sql_data_to_redis(
-                self, table["name"], sql_data_list, self.main_schemas, table["key"], update_list
-            )
+        self.update_redis_table(sql_data_list)
+
         # 重寫redis相關表
         self.reload_redis_table(
             db, self.reload_related_redis_tables, sql_data_list, original_ref_id_dict)
         return sql_data_list
 
     def delete_data(self, db: Session, id_set: set[int]) -> str:
-        sql_data_list = SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model)
+        sql_data_list = self.delete_sql(db, id_set)
         for table in self.redis_tables:
             RedisOperate.delete_redis_data(
                 self, table["name"], sql_data_list, self.main_schemas, table["key"]
@@ -142,6 +134,13 @@ class GeneralOperate(RedisOperate, SQLOperate):
                 self, table["name"], sql_data_list, self.main_schemas, table["key"]
             )
 
+    # 刪除有關聯的redis資料
+    def delete_redis_index_table(self, original_data_list: list, update_list: list):
+        for table in self.redis_tables[1:]:
+            RedisOperate.delete_redis_data(
+                self, table["name"], original_data_list, self.main_schemas, table["key"], update_list
+            )
+
     def reload_relative_table(self, db: Session, sql_data_list: list, original_ref_id_dict=None):
         if original_ref_id_dict is None:
             original_ref_id_dict = dict()
@@ -159,7 +158,7 @@ class GeneralOperate(RedisOperate, SQLOperate):
 
     def get_many2many_ref_id(self, db, id_set) -> dict:
         result = dict()
-        if self.reload_related_redis_tables["many2many"]:
+        if self.reload_related_redis_tables.get("many2many"):
             for table in self.reload_related_redis_tables["many2many"]:
                 stmt = self.create_many2many_stmt(table, id_set)
                 other_id_set: set = {i[0] for i in db.execute(stmt)}

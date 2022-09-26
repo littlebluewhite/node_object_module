@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, DateTime, Float
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, DateTime, Float, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from node_object_SQL.database import Base
@@ -8,17 +8,18 @@ from node_object_SQL.database import Base
 
 class NodeNodeGroup(Base):
     __tablename__ = "node_node_group"
-
-    node_id = Column('node_id', Integer, ForeignKey('node.id'), primary_key=True)
-    node_group_id = Column('node_group_id', Integer, ForeignKey('node_group.id'), primary_key=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    node_id = Column('node_id', Integer, ForeignKey('node.id'))
+    node_group_id = Column('node_group_id', Integer, ForeignKey('node_group.id'))
+    __table_args__ = (UniqueConstraint('node_id', 'node_group_id', name='_node_group_uc'),)
 
 
 class ObjectObjectGroup(Base):
     __tablename__ = "object_object_group"
-
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     object_id = Column('object_id', Integer, ForeignKey('object.id'), primary_key=True)
-    object_group_id = Column('object_group_id', Integer, ForeignKey('object_group.id'), primary_key=True)
-
+    object_group_id = Column('object_group_id', Integer, ForeignKey('object_group.id'))
+    __table_args__ = (UniqueConstraint('object_id', 'object_group_id', name='_object_group_uc'),)
 
 class NodeBase(Base):
     __tablename__ = "node_base"
@@ -293,3 +294,4 @@ class FakeDataConfigTemplate(Base):
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
+

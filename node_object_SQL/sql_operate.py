@@ -48,18 +48,23 @@ class SQLOperate:
         return [jsonable_encoder(i) for i in result]
 
     def update_multiple_sql_data(self, db: Session, update_list: list, sql_model):
+        update_data_dict = dict()
+        update_data_id_set = set()
         try:
-            sql_data_list = list()
-            for row in update_list:
-                datum = db.query(sql_model).filter(sql_model.id == row.id).first()
-                if not datum:
-                    raise self.exc(status_code=404, detail=f"id:{row.id} not found")
-                for item in row:
+            for update_data in update_list:
+                update_data_dict[update_data.id] = update_data
+                update_data_id_set.add(update_data.id)
+            sql_data_list = db.query(sql_model).filter(sql_model.id.in_({i.id for i in update_list})).all()
+            if len(sql_data_list) != len(update_data_id_set):
+                raise self.exc(status_code=404, detail=f"id: one or many of {update_data_id_set} is not exist")
+            for sql_data in sql_data_list:
+                update_data = update_data_dict[getattr(sql_data, "id")]
+                for item in update_data:
+                    print(item)
                     if item[1] is not None and item[0] != "id":
-                        setattr(datum, item[0], item[1])
+                        setattr(sql_data, item[0], item[1])
                 db.flush()
-                db.refresh(datum)
-                sql_data_list.append(datum)
+                db.refresh(sql_data)
             return sql_data_list
         except IntegrityError as e:
             code, msg = e.orig.args
@@ -67,6 +72,8 @@ class SQLOperate:
                 raise self.exc(status_code=403, detail=msg)
             elif code == 1406:
                 raise self.exc(status_code=403, detail=msg)
+        except UnmappedInstanceError:
+            raise self.exc(status_code=404, detail=f"id: one or more of {update_data_id_set} is not exist")
 
     def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model) -> list:
         try:
@@ -77,6 +84,10 @@ class SQLOperate:
             db.execute(stmt)
             db.flush()
             return delete_data_list
+        except IntegrityError as e:
+            code, msg = e.orig.args
+            if code == 1451:
+                raise self.exc(status_code=403, detail=msg)
         except UnmappedInstanceError:
             raise self.exc(status_code=404, detail=f"id: one or more of {str(id_set)} is not exist")
 

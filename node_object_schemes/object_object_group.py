@@ -7,6 +7,8 @@ class ObjectObjectGroupBasic(BaseModel):
 
 
 class ObjectObjectGroup(ObjectObjectGroupBasic):
+    id: int
+
     class Config:
         orm_mode = True
 
@@ -21,4 +23,4 @@ class ObjectObjectGroupUpdate(ObjectObjectGroupBasic):
 
 
 class ObjectObjectGroupMultipleUpdate(ObjectObjectGroupUpdate):
-    pass
+    id: int

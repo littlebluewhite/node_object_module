@@ -54,6 +54,9 @@ class APINodeUpdate(NodeBasic):
     node_id: str | None = None
     name: str | None = None
     tags: list[str] | None = None
-    node_base: APINodeBaseUpdate | None = None
-    third_dimension_instance: node_object_schemes.third_dimension_instance.ThirdDimensionInstanceUpdate | None = None
+    node_base: APINodeBaseUpdate = APINodeBaseUpdate()
+    third_dimension_instance: node_object_schemes.third_dimension_instance.ThirdDimensionInstanceBasic | None = None
 
+
+class APINodeMultipleUpdate(APINodeUpdate):
+    id: int
