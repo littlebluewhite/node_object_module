@@ -7,13 +7,15 @@ import node_object_data.node
 import node_object_data.node_base
 import node_object_data.third_dimension_instance
 import node_object_data.device_info
+import node_object_data.node_node_group
+import node_object_data.object
 from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
 from node_object_function.API.API_node import APINodeFunction
 from node_object_function.General_operate import GeneralOperate
 
 
-class NodeAPIRouter(APINodeFunction):
+class APINodeRouter(APINodeFunction):
     def __init__(self, module, redis_db: redis.Redis, exc, db_session: sessionmaker):
         self.main_schemas = module.main_schemas
         self.create_schemas = module.create_schemas
@@ -25,6 +27,8 @@ class NodeAPIRouter(APINodeFunction):
         self.node_base_operate = GeneralOperate(node_object_data.node_base, redis_db, exc)
         self.third_d_operate = GeneralOperate(node_object_data.third_dimension_instance, redis_db, exc)
         self.device_info_operate = GeneralOperate(node_object_data.device_info, redis_db, exc)
+        self.nn_group_operate = GeneralOperate(node_object_data.node_node_group, redis_db, exc)
+        self.object_operate = GeneralOperate(node_object_data.object, redis_db, exc)
 
     def create(self):
         router = APIRouter(
@@ -292,6 +296,35 @@ class NodeAPIRouter(APINodeFunction):
                 original_data_list = self.node_operate.read_data_from_redis_by_key_set({node_id})
                 if len(original_data_list) != 1:
                     raise self.exc(status_code=404, detail=f"id: one or many of {node_id} is not exist")
-                parent_node_set = set(self.format_api_node(original_data_list[0])["child"])
+                format_node = self.format_api_node(original_data_list[0])
+                parent_node_set = set(format_node["child"])
+                object_set = set(format_node["objects"])
+                group_set = set(format_node["groups"])
+                # FIXME 改成刪除所有children Node
+                node_update_list = [self.node_operate.multiple_update_schemas(
+                    id=i, parent_node_id=0) for i in parent_node_set]
+                node_list = self.node_operate.update_sql(db, node_update_list)
+                device_info_list = []
+                tdi_list = []
+                # TODO delete object
+                if format_node["node_base"]["device_info"] is not None:
+                    device_info_list = self.device_info_operate.delete_sql(
+                        db, {format_node["node_base"]["device_info"]["id"]})
+                if format_node["third_dimension_instance"] is not None:
+                    tdi_list = self.third_d_operate.delete_sql(db, {format_node["third_dimension_instance"]})
+                # 取得node_node_group table node_id為key的list
+                nn_group_id_list = self.nn_group_operate.read_data_from_redis_by_key_set({node_id}, 1)
+                nn_group_list = self.nn_group_operate.delete_sql(db, set(nn_group_id_list))
+                # TODO 確認功能後繼續
 
         return router
+
+
+
+
+
+
+
+
+
+

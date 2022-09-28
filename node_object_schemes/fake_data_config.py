@@ -7,13 +7,13 @@ import node_object_schemes.fake_data_config_base
 
 class FakeDataConfigBasic(BaseModel):
     name: str | None = None
-    fake_data_config_base: int | None = None
-    object_id: int | None = None
 
 
 class FakeDataConfig(FakeDataConfigBasic):
-    id: str
+    id: int
 
+    fake_data_config_base_id: int | None = None
+    object_id: int | None = None
     fake_data_config_base: node_object_schemes.fake_data_config_base.FakeDataConfigBase | None = None
 
     create_at: datetime.datetime
@@ -24,11 +24,13 @@ class FakeDataConfig(FakeDataConfigBasic):
 
 
 class FakeDataConfigCreate(FakeDataConfigBasic):
-    pass
+    fake_data_config_base_id: int | None = None
+    object_id: int | None = None
 
 
 class FakeDataConfigUpdate(FakeDataConfigBasic):
-    pass
+    fake_data_config_base_id: int | None = None
+    object_id: int | None = None
 
 
 class FakeDataConfigMultipleUpdate(FakeDataConfigUpdate):

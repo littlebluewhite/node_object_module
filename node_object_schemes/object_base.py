@@ -15,7 +15,7 @@ class ObjectBaseBasic(BaseModel):
 
 
 class ObjectBase(ObjectBaseBasic):
-    id: str
+    id: int
     dec: int
     is_control: bool
 

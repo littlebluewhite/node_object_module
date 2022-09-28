@@ -11,7 +11,7 @@ class DeviceInfoBasic(BaseModel):
 
 
 class DeviceInfo(DeviceInfoBasic):
-    id: str
+    id: int
     node_base_id: int | None = None
 
     class Config:

@@ -20,7 +20,7 @@ class NodeGroupBasic(BaseModel):
 
 
 class NodeGroup(NodeGroupBasic):
-    id: str
+    id: int
     update_at: datetime.datetime
 
     nodes: list[NodeNodeGroup] = list()
@@ -40,4 +40,4 @@ class NodeGroupUpdate(NodeGroupBasic):
 
 
 class NodeGroupMultipleUpdate(NodeGroupBasic):
-    id: str
+    id: int

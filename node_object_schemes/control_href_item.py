@@ -12,7 +12,7 @@ class ControlHrefItemBasic(BaseModel):
 
 
 class ControlHrefItem(ControlHrefItemBasic):
-    id: str
+    id: int
     tags: list[str]
 
     create_at: datetime.datetime

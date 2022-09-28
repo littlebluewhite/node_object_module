@@ -1,6 +1,6 @@
 class APINodeFunction:
     @staticmethod
-    def format_api_node(node):
+    def format_api_node(node: dict):
         child_nodes = []
         node_groups = []
         objects = []

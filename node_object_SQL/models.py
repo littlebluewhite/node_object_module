@@ -161,7 +161,6 @@ class Object(Base):
     node = relationship("Node", back_populates="objects", lazy="immediate", uselist=False)
     object_base = relationship("ObjectBase", lazy="immediate", uselist=False)
     object_groups = relationship("ObjectObjectGroup", lazy="joined")
-    control_href_group = relationship("ControlHrefGroup", lazy="immediate", uselist=False)
     fake_data_config = relationship("FakeDataConfig", lazy="immediate", uselist=False)
 
 

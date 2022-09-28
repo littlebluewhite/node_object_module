@@ -11,7 +11,7 @@ class ControlHrefItemTemplateBasic(BaseModel):
 
 
 class ControlHrefItemTemplate(ControlHrefItemTemplateBasic):
-    id: str
+    id: int
 
     update_at: datetime.datetime
 

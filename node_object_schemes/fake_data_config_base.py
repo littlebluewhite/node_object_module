@@ -10,7 +10,7 @@ class FakeDataConfigBaseBasic(BaseModel):
 
 
 class FakeDataConfigBase(FakeDataConfigBaseBasic):
-    id: str
+    id: int
     faking_frequency: float
     faking_default_value: float
     faking_max: float

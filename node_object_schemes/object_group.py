@@ -17,7 +17,7 @@ class ObjectGroupBasic(BaseModel):
 
 
 class ObjectGroup(ObjectGroupBasic):
-    id: str
+    id: int
     is_topic: bool
 
     objects: list[ObjectObjectGroup] = list()

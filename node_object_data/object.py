@@ -5,6 +5,7 @@ from node_object_SQL import models
 name = "object"
 redis_tables = [
     {"name": name, "key": "id"},
+    {"name": "object_by_object_id", "key": "object_id"},
 ]
 sql_model = models.Object
 main_schemas = node_object_schemes.object.Object

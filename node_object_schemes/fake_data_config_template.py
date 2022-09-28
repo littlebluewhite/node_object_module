@@ -12,7 +12,7 @@ class FakeDataConfigTemplateBasic(BaseModel):
 
 
 class FakeDataConfigTemplate(FakeDataConfigTemplateBasic):
-    id: str
+    id: int
 
     fake_data_config_base: node_object_schemes.fake_data_config_base.FakeDataConfigBase | None = None
 

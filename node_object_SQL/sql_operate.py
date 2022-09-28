@@ -8,6 +8,7 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 class SQLOperate:
     def __init__(self, exc):
         self.exc = exc
+        self.null_set = {0, ""}
 
     def create_multiple_sql_data(self, db: Session, create_list: list, sql_model) -> list:
         try:
@@ -62,7 +63,10 @@ class SQLOperate:
                 for item in update_data:
                     print(item)
                     if item[1] is not None and item[0] != "id":
-                        setattr(sql_data, item[0], item[1])
+                        if item[1] in self.null_set:
+                            setattr(sql_data, item[0], None)
+                        else:
+                            setattr(sql_data, item[0], item[1])
                 db.flush()
                 db.refresh(sql_data)
             return sql_data_list
