@@ -263,9 +263,9 @@ class FakeDataConfigBase(Base):
     id = Column(Integer, primary_key=True, index=True)
     faking_frequency = Column(Float, default=5.0)  # 打假資料的頻率
     faking_default_value = Column(Float, default=0.0)  # 假資料預設值
-    faking_inc_limit = Column(Float, default=0.0)  # 假資料增加上限
-    faking_dec_limit = Column(Float, default=0.0)  # 假資料減少上限
-    faking_extra_info = Column(Float, default=0.0)  # 假資料額外資訊
+    faking_max = Column(Float, default=0.0)  # 假資料增加上限
+    faking_min = Column(Float, default=0.0)  # 假資料減少上限
+    faking_extra_info = Column(String(256), default="")  # 假資料額外資訊
 
 
 class FakeDataConfig(Base):

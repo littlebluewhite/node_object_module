@@ -5,3 +5,4 @@ class APIObjectFunction:
         for item in obj["object_groups"]:
             object_groups.append(item["id"])
         obj["object_groups"] = object_groups
+        return obj

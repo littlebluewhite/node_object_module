@@ -13,6 +13,7 @@ from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
 from node_object_function.API.API_node import APINodeFunction
 from node_object_function.General_operate import GeneralOperate
+from node_object_function.create_data_structure import create_update_dict
 
 
 class APINodeRouter(APINodeFunction):
@@ -220,24 +221,10 @@ class APINodeRouter(APINodeFunction):
                 db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
                 update_dict_list = [i.dict() for i in update_list]
-                node = {
-                    "update_list": [],
-                    "sql_list": []
-                }
-                node_base = {
-                    "update_list": [],
-                    "sql_list": []
-                }
-                device_info = {
-                    "create_list": [],
-                    "update_list": [],
-                    "sql_list": []
-                }
-                tdi = {
-                    "create_list": [],
-                    "update_list": [],
-                    "sql_list": []
-                }
+                node = create_update_dict(create=False)
+                node_base = create_update_dict(create=False)
+                device_info = create_update_dict()
+                tdi = create_update_dict()
                 original_data_list = self.node_operate.read_data_from_redis_by_key_set({i.id for i in update_list})
                 original_key_id_dict: dict = {i["id"]: i for i in original_data_list}
                 self_ref_id_dict = self.node_operate.get_self_ref_id(

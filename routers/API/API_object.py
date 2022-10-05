@@ -1,5 +1,6 @@
 import redis
 from fastapi import APIRouter, Depends, Query
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
 import node_object_data.object
@@ -11,6 +12,7 @@ from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
 from node_object_function.API.API_object import APIObjectFunction
 from node_object_function.General_operate import GeneralOperate
+from node_object_function.create_data_structure import create_update_dict
 
 
 class APIObjectRouter(APIObjectFunction):
@@ -24,8 +26,8 @@ class APIObjectRouter(APIObjectFunction):
         self.object_operate = GeneralOperate(node_object_data.object, redis_db, exc)
         self.object_base_operate = GeneralOperate(node_object_data.object_base, redis_db, exc)
         self.oo_groups_operate = GeneralOperate(node_object_data.object_object_group, redis_db, exc)
-        self.fdc = GeneralOperate(node_object_data.fake_data_config, redis_db, exc)
-        self.fdcBase = GeneralOperate(node_object_data.fake_data_config_base, redis_db, exc)
+        self.fdc_operate = GeneralOperate(node_object_data.fake_data_config, redis_db, exc)
+        self.fdcBase_operate = GeneralOperate(node_object_data.fake_data_config_base, redis_db, exc)
 
     def create(self):
         router = APIRouter(
@@ -46,7 +48,7 @@ class APIObjectRouter(APIObjectFunction):
             else:
                 id_set = self.object_operate.execute_sql_where_command(db, common.where_command)
                 objects = self.object_operate.read_data_from_redis_by_key_set(id_set)[common.skip:][:common.limit]
-            return {self.format_api_object(i) for i in objects}
+            return [self.format_api_object(i) for i in objects]
 
         @router.get("/by_object_id/", response_model=list[self.main_schemas])
         async def get_objects_by_object_id(common: CommonQuery = Depends(),
@@ -65,22 +67,178 @@ class APIObjectRouter(APIObjectFunction):
         async def create_api_node(create_data: create_schemas,
                                   db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
-                object_dict_list = []
-                object_base_create_list = []
+                create_dict = create_data.dict()
+                object_base_create = self.object_base_operate.create_schemas(**create_dict["object_base"])
+                object_base = self.object_base_operate.create_sql(db, [object_base_create])[0]
+                o_create = self.object_operate.create_schemas(**create_dict, object_base_id=object_base.id)
+                o = self.object_operate.create_sql(db, [o_create])[0]
+                if create_dict.get("fake_data_config", None):
+                    fdc_base_create = self.fdcBase_operate.create_schemas(
+                        **create_dict["fake_data_config"]["fake_data_config_base"])
+                    fdc_base = self.fdcBase_operate.create_sql(db, [fdc_base_create])[0]
+                    fdc_create = self.fdc_operate.create_schemas(
+                        **create_dict["fake_data_config"], fake_data_config_base_id=fdc_base.id, object_id=o.id)
+                    fdc = self.fdc_operate.create_sql(db, [fdc_create])[0]
+                db.refresh(o)
+
+                # redis create data
+                if create_dict.get("fake_data_config", None):
+                    self.fdc_operate.update_redis_table([fdc])
+                    self.fdcBase_operate.update_redis_table([fdc_base])
+                self.object_operate.update_redis_table([o])
+                self.object_base_operate.update_redis_table([object_base])
+
+                # redis reload table
+                self.object_operate.reload_redis_table(db, self.object_operate.reload_related_redis_tables, [o])
+
+                return jsonable_encoder(o)
+
+        @router.post("/multiple/", response_model=list[self.main_schemas])
+        async def create_api_objects(create_data_list: list[create_schemas],
+                                     db: Session = Depends(create_get_db(self.db_session))):
+            with db.begin():
+                create_dict_list = []
+                o_create_list = []
+                o_base_create_list = []
+                fdc_dict_list = []
+                fdc_create_list = []
+                fdc_base_create_list = []
+                for create_data in create_data_list:
+                    create_dict = create_data.dict()
+                    create_dict_list.append(create_dict)
+                    if create_dict["fake_data_config"]:
+                        fdc_dict_list.append(create_dict["fake_data_config"])
+                        fdc_base_create_list.append(self.fdcBase_operate.create_schemas(
+                            **create_dict["fake_data_config"]["fake_data_config_base"]))
+                    else:
+                        fdc_dict_list.append(None)
+                    o_base_create_list.append(self.object_base_operate.create_schemas(**create_dict["object_base"]))
+                o_base_list = self.object_base_operate.create_sql(db, o_base_create_list)
+                for create_dict, o_base in zip(create_dict_list, o_base_list):
+                    o_create_list.append(self.object_operate.create_schemas(**create_dict, object_base_id=o_base.id))
+                o_list = self.object_operate.create_sql(db, o_create_list)
+                fdc_base_list = self.fdcBase_operate.create_sql(db, fdc_base_create_list)
+                fdc_base_iterator = iter(fdc_base_list)
+                for o, fdc_dict in zip(o_list, fdc_dict_list):
+                    if fdc_dict is None:
+                        continue
+                    else:
+                        fdc_base = next(fdc_base_iterator)
+                        fdc_create_list.append(self.fdc_operate.create_schemas(
+                            **fdc_dict, object_id=o.id, fake_data_config_base_id=fdc_base.id))
+                fdc_list = self.fdc_operate.create_sql(db, fdc_create_list)
+                # refresh object
+                for o in o_list:
+                    db.refresh(o)
+                # update redis table
+                self.fdc_operate.update_redis_table(fdc_list)
+                self.fdcBase_operate.update_redis_table(fdc_base_list)
+                self.object_operate.update_redis_table(o_list)
+                self.object_base_operate.update_redis_table(o_base_list)
+
+                self.object_operate.reload_redis_table(db, self.object_operate.reload_related_redis_tables, o_list)
+                return jsonable_encoder(o_list)
+
+        @router.patch("/{object_id}", response_model=self.main_schemas)
+        async def update_api_object(update_data: update_schemas, object_id: int,
+                                    db: Session = Depends(create_get_db(self.db_session))):
+            with db.begin():
+                update_dict = update_data.dict()
+                o = create_update_dict(create=False)
+                o_base = create_update_dict(create=False)
+                fdc = create_update_dict()
+                fdc_base = create_update_dict()
+                original_o_data = self.object_operate.read_data_from_redis_by_key_set({object_id})[0]
+                self_ref_id_dict = self.object_operate.get_self_ref_id(
+                    [self.object_operate.main_schemas(**original_o_data)])
+                if not original_o_data["fake_data_config"] and update_dict["fake_data_config"]:
+                    fdc_base["create_list"].append(self.fdcBase_operate.create_schemas(
+                        **update_dict["fake_data_config"]["fake_data_config_base"]))
+                    fdc_base["sql_list"].extend(self.fdcBase_operate.create_sql(db, fdc_base["create_list"]))
+                    fdc["create_list"].append(self.fdc_operate.create_schemas(
+                        **update_dict["fake_data_config"], object_id=object_id,
+                        fake_data_config_base_id=fdc_base["sql_list"][0].id))
+                    fdc["sql_list"].extend(self.fdc_operate.create_sql(db, fdc["create_list"]))
+                elif original_o_data["fake_data_config"] and update_dict["fake_data_config"]:
+                    if update_dict["fake_data_config"]["fake_data_config_base"]:
+                        fdc_base["update_list"].append(self.fdcBase_operate.multiple_update_schemas(
+                            **update_dict["fake_data_config"]["fake_data_config_base"],
+                            id=original_o_data["fake_data_config"]["fake_data_config_base"]["id"]))
+                        fdc_base["sql_list"].extend(self.fdcBase_operate.update_sql(db, fdc_base["update_list"]))
+                    fdc["update_list"].append(self.fdc_operate.multiple_update_schemas(
+                        **update_dict["fake_data_config"], id=original_o_data["fake_data_config"]["id"]))
+                    fdc["sql_list"].extend(self.fdc_operate.update_sql(db, fdc["update_list"]))
+                if update_dict["object_base"]:
+                    o_base["update_list"].append(self.object_base_operate.multiple_update_schemas(
+                        **update_dict["object_base"], id=original_o_data["object_base"]["id"]))
+                o["update_list"].append(self.object_operate.multiple_update_schemas(
+                    **update_dict, id=object_id))
+                o_base["sql_list"].extend(self.object_base_operate.update_sql(db, o_base["update_list"]))
+                o["sql_list"].extend(self.object_operate.update_sql(db, o["update_list"]))
+                # redis operate
+                # redis delete index table
+                if original_o_data["fake_data_config"]:
+                    self.fdcBase_operate.delete_redis_index_table(
+                        [original_o_data["fake_data_config"]["fake_data_config_base"]], fdc_base["update_list"])
+                    self.fdc_operate.delete_redis_index_table(
+                        [original_o_data["fake_data_config"]], fdc["update_list"])
+                self.object_base_operate.delete_redis_index_table(
+                    [original_o_data["object_id"]], o_base["update_list"])
+                self.object_operate.delete_redis_index_table([original_o_data], o["update_list"])
+                # reload redis table
+                self.fdcBase_operate.update_redis_table(fdc_base["sql_list"])
+                print(fdc["sql_list"])
+                self.fdc_operate.update_redis_table(fdc["sql_list"])
+                self.object_base_operate.update_redis_table(o_base["sql_list"])
+                self.object_operate.update_redis_table(o["sql_list"])
+                # reload related redis table
+                self.object_operate.reload_redis_table(db, self.object_operate.reload_related_redis_tables,
+                                                       o["sql_list"], self_ref_id_dict)
+                return self.format_api_object(jsonable_encoder(o["sql_list"][0]))
+
+        @router.patch("/multiple/", response_model=list[self.main_schemas])
+        async def update_api_object(
+                update_list: list[multiple_update_schemas],
+                db: Session = Depends(create_get_db(self.db_session))):
+            with db.begin():
+                update_dict_list = [i.dict() for i in update_list]
+                fdc = create_update_dict()
+                fdc_base = create_update_dict()
+                o = create_update_dict(create=False)
+                o_base = create_update_dict(create=False)
+                original_data_list = self.object_operate.read_data_from_redis_by_key_set({i.id for i in update_list})
+                original_key_id_dict: dict = {i["id"]: i for i in original_data_list}
+                self_ref_id_dict = self.object_operate.get_self_ref_id(
+                    [self.object_operate.main_schemas(**i) for i in original_data_list])
+                for data in update_dict_list:
+                    original_o: dict = original_key_id_dict[data["id"]]
+                    original_o_base: dict = original_o["object_base"]
+                    original_fdc = original_o["fake_data_config"]
+                    if not original_fdc and data["fake_data_config"]:
+                        fdc_base["create_list"].append(self.fdcBase_operate.create_schemas(
+                            **data["fake_data_config"]["fake_data_config_base"]))
+                        fdc["create_list"].append(self.fdc_operate.create_schemas(
+                            **data["fake_data_config"], object_id=original_o["id"]))
+                    elif original_fdc and data["fake_data_config"]:
+                        if data["fake_data_config"]["fake_data_config_base"]:
+                            fdc_base["update_list"].append(self.fdcBase_operate.multiple_update_schemas(
+                                **data["fake_data_config"]["fake_data_config_base"],
+                                id=original_fdc["fake_data_config_base"]["id"]))
+                        fdc["update_list"].append(self.fdc_operate.multiple_update_schemas(
+                            **data["fake_data_config"], id=original_fdc["id"]))
+                # DB operate
+                fdc_base["sql_list"].extend(self.fdcBase_operate.create_sql(db, fdc_base["create_list"]))
+                # fdc create schemas add fdc_base_sql_data id
+                for fdc_base_sql_data, create_data in zip(fdc_base["sql_list"], fdc["create_list"]):
+                    create_data.fake_data_config_base_id = fdc_base_sql_data.id
+                fdc["sql_list"].extend(self.fdc_operate.create_sql(db, fdc["create_list"]))
+                o_base["sql_list"].extend(self.object_base_operate.create_sql(db, o_base["create_list"]))
+                o["sql_list"].extend(self.object_operate.create_sql(db, o["create_list"]))
+                # redis operate
+                # redis delete index table
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+        return router
 
 
 

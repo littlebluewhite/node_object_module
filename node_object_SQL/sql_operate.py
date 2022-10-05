@@ -63,8 +63,11 @@ class SQLOperate:
                 for item in update_data:
                     print(item)
                     if item[1] is not None and item[0] != "id":
-                        if item[1] in self.null_set:
-                            setattr(sql_data, item[0], None)
+                        if type(item[1]) == str or type(item[1]) == int:
+                            if item[1] in self.null_set:
+                                setattr(sql_data, item[0], None)
+                            else:
+                                setattr(sql_data, item[0], item[1])
                         else:
                             setattr(sql_data, item[0], item[1])
                 db.flush()

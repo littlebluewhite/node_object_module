@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 import node_object_data.API.API_node
+import node_object_data.API.API_object
 
 import node_object_data.node
 import node_object_data.node_base
@@ -32,6 +33,7 @@ from node_object_SQL import models
 from node_object_SQL.database import SQLDB
 from node_object_exception import NodeObjectException
 from node_object_redis.redis import NodeRedis
+from routers.API.API_object import APIObjectRouter
 from routers.General_table_router import GeneralRouter
 from routers.API.API_node import APINodeRouter
 
@@ -81,6 +83,8 @@ db_session = db.new_db_session()
 # router
 node_object_app.include_router(APINodeRouter(node_object_data.API.API_node, redis_db,
                                              NodeObjectException, db_session).create())
+node_object_app.include_router(APIObjectRouter(node_object_data.API.API_object, redis_db,
+                                               NodeObjectException, db_session).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node, redis_db,
                                              NodeObjectException, db_session).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node_base, redis_db,

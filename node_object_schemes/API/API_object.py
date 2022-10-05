@@ -31,6 +31,8 @@ class APIFdcUpdate(APIFdc):
 
 
 class APIObjectUpdate(ObjectBasic):
+    name: str | None = None
+    object_id: str | None = None
     object_base: ObjectBaseUpdate | None = None
     fake_data_config: APIFdcUpdate | None = None
 
