@@ -54,7 +54,7 @@ class Node(Base):
                                lazy="joined",
                                join_depth=2)
     third_dimension_instance = relationship("ThirdDimensionInstance", lazy="joined", uselist=False)
-    objects = relationship("Object", back_populates="node", lazy="joined")
+    objects = relationship("Object", lazy="joined")
     node_groups = relationship("NodeNodeGroup", lazy="joined")  # 節點所屬的節點群組，這是一張列表，表示這個點為可能屬於多個節點群組
 
 
@@ -158,7 +158,6 @@ class Object(Base):
     create_at = Column(DateTime, default=datetime.datetime.now)
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
-    node = relationship("Node", back_populates="objects", lazy="immediate", uselist=False)
     object_base = relationship("ObjectBase", lazy="immediate", uselist=False)
     object_groups = relationship("ObjectObjectGroup", lazy="joined")
     fake_data_config = relationship("FakeDataConfig", lazy="immediate", uselist=False)
@@ -187,7 +186,7 @@ class ObjectGroup(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256), nullable=False, unique=True)  # 節點資訊名稱
-    is_topics = Column(Boolean, default=True, nullable=False)  # 是否為主題
+    is_topic = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))  # 點位(物件)群組文字描述
 
     update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間

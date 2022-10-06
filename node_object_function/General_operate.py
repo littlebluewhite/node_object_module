@@ -2,6 +2,7 @@
 # 2. update redis tables which the sql table generate
 # 3, reload the redis tables which are related to the sql table
 import redis
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, sessionmaker
 from node_object_SQL.sql_operate import SQLOperate
 from node_object_redis.redis_operate import RedisOperate
@@ -36,10 +37,12 @@ class GeneralOperate(RedisOperate, SQLOperate):
     def reload_redis_table(self, db, reload_related_redis_tables, sql_data_list, origin_ref_id_dict=None):
         if origin_ref_id_dict is None:
             origin_ref_id_dict = dict()
+        dict_data_list = jsonable_encoder(sql_data_list)
         for key in reload_related_redis_tables:
             if key == "self_field":
                 for table in reload_related_redis_tables["self_field"]:
-                    ref_id_set = {getattr(i, table["field"]) for i in sql_data_list}
+                    # ref_id_set = {getattr(i, table["field"]) for i in sql_data_list}
+                    ref_id_set = {i[table["field"]] for i in dict_data_list}
                     # 取得需要更新的id交集
                     old_ref_id_set: set = origin_ref_id_dict.get(table["field"], None)
                     if old_ref_id_set:
@@ -49,14 +52,16 @@ class GeneralOperate(RedisOperate, SQLOperate):
                     self.reload_redis_table(db, table["module"].reload_related_redis_tables, sql_data_list2)
             elif key == "outside_field":
                 for table in reload_related_redis_tables["outside_field"]:
-                    id_set = {getattr(i, "id") for i in sql_data_list}
+                    # id_set = {getattr(i, "id") for i in sql_data_list}
+                    id_set = {i["id"] for i in dict_data_list}
                     sql_data_list2 = self.__reload_redis_from_sql(db, table["module"], id_set, table["field"])
                     self.reload_redis_table(db, table["module"].reload_related_redis_tables, sql_data_list2)
             elif key == "many2many":
                 for table in reload_related_redis_tables["many2many"]:
                     old_ref_id_set: set = origin_ref_id_dict.get(table["other_id_field"], set())
                     ref_id_set: set = self.get_many2many_ref_id(
-                        db, {i.id for i in sql_data_list}).get(table["other_id_field"], set())
+                        # db, {i.id for i in sql_data_list}).get(table["other_id_field"], set())
+                        db, {i["id"] for i in dict_data_list}).get(table["other_id_field"], set())
                     ref_id_set |= old_ref_id_set
                     sql_data_list2 = self.__reload_redis_from_sql(db, table["module"], ref_id_set, "id")
                     self.reload_redis_table(db, table["module"].reload_related_redis_tables, sql_data_list2)
@@ -128,8 +133,8 @@ class GeneralOperate(RedisOperate, SQLOperate):
     def update_sql(self, db, update_list: list) -> list:
         return SQLOperate.update_multiple_sql_data(self, db, update_list, self.sql_model)
 
-    def delete_sql(self, db, id_set: set) -> list:
-        return SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model)
+    def delete_sql(self, db, id_set: set, return_sql: bool = True) -> list:
+        return SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model, return_sql)
 
     def update_redis_table(self, sql_data_list: list):
         for table in self.redis_tables:

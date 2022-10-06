@@ -34,8 +34,8 @@ class RedisOperate:
             update_dict[update_data.id] = update_data
         result: list[Any] = list()
         for sql_data in sql_data_list:
-            # print(sql_data)
-            # print(schemas_model)
+            print(sql_data)
+            print(schemas_model)
             row = schemas_model(**jsonable_encoder(sql_data))
             # 寫入主表
             if key == "id":

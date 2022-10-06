@@ -22,7 +22,7 @@ class ObjectBasic(BaseModel):
 
 
 class Object(ObjectBasic):
-    id: str
+    id: int
     tags: list[str]
 
     object_base_id: int | None = None

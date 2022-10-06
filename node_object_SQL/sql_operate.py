@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 class SQLOperate:
     def __init__(self, exc):
         self.exc = exc
-        self.null_set = {0, ""}
+        self.null_set = {-999, ""}
 
     def create_multiple_sql_data(self, db: Session, create_list: list, sql_model) -> list:
         try:
@@ -82,11 +82,14 @@ class SQLOperate:
         except UnmappedInstanceError:
             raise self.exc(status_code=404, detail=f"id: one or more of {update_data_id_set} is not exist")
 
-    def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model) -> list:
+    def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model, return_sql: bool = True) -> list:
         try:
-            delete_data_list = db.query(sql_model).filter(sql_model.id.in_(id_set)).all()
-            if len(id_set) != len(delete_data_list):
-                raise self.exc(status_code=404, detail=f"id: one or many of {str(id_set)} is not exist")
+            if return_sql:
+                delete_data_list = db.query(sql_model).filter(sql_model.id.in_(id_set)).all()
+                if len(id_set) != len(delete_data_list):
+                    raise self.exc(status_code=404, detail=f"id: one or many of {str(id_set)} is not exist")
+            else:
+                delete_data_list = []
             stmt = delete(sql_model).where(sql_model.id.in_(id_set))
             db.execute(stmt)
             db.flush()

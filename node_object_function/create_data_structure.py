@@ -9,3 +9,10 @@ def create_update_dict(create: bool = True, update: bool = True, sql: bool = Tru
     if temp:
         result["temp_list"] = []
     return result
+
+
+def create_delete_dict():
+    return {
+        "id_set": set(),
+        "data_list": []
+    }
