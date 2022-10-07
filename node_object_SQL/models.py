@@ -151,7 +151,7 @@ class Object(Base):
     object_id = Column(String(256), unique=True, nullable=False)
     name = Column(String(256))  # 點位(物件)名稱
     object_base_id = Column(Integer, ForeignKey("object_base.id"), unique=True)
-    node_id = Column(Integer, ForeignKey("node.id"), unique=True)  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"
+    node_id = Column(Integer, ForeignKey("node.id"))  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"
     tags = Column(JSON, default=list())
     control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"))
 

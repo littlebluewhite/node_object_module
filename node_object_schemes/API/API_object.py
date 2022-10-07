@@ -1,5 +1,7 @@
 import datetime
 
+from pydantic import BaseModel
+
 from node_object_schemes.fake_data_config import FakeDataConfigBasic
 from node_object_schemes.fake_data_config_base import FakeDataConfigBaseBasic, FakeDataConfigBaseUpdate
 from node_object_schemes.object import ObjectBasic
@@ -39,3 +41,8 @@ class APIObjectUpdate(ObjectBasic):
 
 class APIObjectMultipleUpdate(APIObjectUpdate):
     id: int
+
+
+class InsertValue(BaseModel):
+    id: int
+    value: str
