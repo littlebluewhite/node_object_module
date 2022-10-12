@@ -3,33 +3,16 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
-import node_object_data.node
-import node_object_data.node_base
-import node_object_data.third_dimension_instance
-import node_object_data.device_info
-import node_object_data.node_node_group
-import node_object_data.object
 from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
-from node_object_function.API.API_node import APINodeFunction
-from node_object_function.General_operate import GeneralOperate
+from node_object_function.API.API_node import APINodeOperate
 from node_object_function.create_data_structure import create_update_dict
 
 
-class APINodeRouter(APINodeFunction):
+class APINodeRouter(APINodeOperate):
     def __init__(self, module, redis_db: redis.Redis, exc, db_session: sessionmaker):
-        self.main_schemas = module.main_schemas
-        self.create_schemas = module.create_schemas
-        self.update_schemas = module.update_schemas
-        self.multiple_update_schemas = module.multiple_update_schemas
         self.db_session = db_session
-        self.exc = exc
-        self.node_operate = GeneralOperate(node_object_data.node, redis_db, exc)
-        self.node_base_operate = GeneralOperate(node_object_data.node_base, redis_db, exc)
-        self.third_d_operate = GeneralOperate(node_object_data.third_dimension_instance, redis_db, exc)
-        self.device_info_operate = GeneralOperate(node_object_data.device_info, redis_db, exc)
-        self.nn_group_operate = GeneralOperate(node_object_data.node_node_group, redis_db, exc)
-        self.object_operate = GeneralOperate(node_object_data.object, redis_db, exc)
+        APINodeOperate.__init__(self, module, redis_db, exc)
 
     def create(self):
         router = APIRouter(
@@ -280,29 +263,28 @@ class APINodeRouter(APINodeFunction):
         @router.delete("/{node_id}")
         async def delete_api_node(node_id: int, db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
-                original_data_list = self.node_operate.read_data_from_redis_by_key_set({node_id})
-                if len(original_data_list) != 1:
-                    raise self.exc(status_code=404, detail=f"id: one or many of {node_id} is not exist")
-                format_node = self.format_api_node(original_data_list[0])
-                parent_node_set = set(format_node["child"])
-                object_set = set(format_node["objects"])
-                group_set = set(format_node["groups"])
-                # FIXME 改成刪除所有children Node
-                node_update_list = [self.node_operate.multiple_update_schemas(
-                    id=i, parent_node_id=0) for i in parent_node_set]
-                node_list = self.node_operate.update_sql(db, node_update_list)
-                device_info_list = []
-                tdi_list = []
-                # TODO delete object
-                if format_node["node_base"]["device_info"] is not None:
-                    device_info_list = self.device_info_operate.delete_sql(
-                        db, {format_node["node_base"]["device_info"]["id"]})
-                if format_node["third_dimension_instance"] is not None:
-                    tdi_list = self.third_d_operate.delete_sql(db, {format_node["third_dimension_instance"]})
-                # 取得node_node_group table node_id為key的list
-                nn_group_id_list = self.nn_group_operate.read_data_from_redis_by_key_set({node_id}, 1)
-                nn_group_list = self.nn_group_operate.delete_sql(db, set(nn_group_id_list))
-                # TODO 確認功能後繼續
+                delete_data = self.get_delete_data({node_id})
+                print(delete_data)
+                self.api_object_operate.delete_multiple_object(delete_data["object"]["id_set"], db)
+                self.nn_group_operate.delete_sql(db, delete_data["nn_group"]["id_set"], False)
+                self.third_d_operate.delete_sql(db, delete_data["tdi"]["id_set"], False)
+                self.device_info_operate.delete_sql(db, delete_data["device_info"]["id_set"], False)
+                while delete_data["node"]["stack"]:
+                    id_set = delete_data["node"]["stack"].pop()
+                    self.node_operate.delete_sql(db, id_set, False)
+                self.node_base_operate.delete_sql(db, delete_data["node_base"]["id_set"], False)
+                # delete redis table
+                self.nn_group_operate.delete_redis_table(delete_data["nn_group"]["data_list"])
+                self.third_d_operate.delete_redis_table(delete_data["tdi"]["data_list"])
+                self.device_info_operate.delete_redis_table(delete_data["device_info"]["data_list"])
+                self.node_operate.delete_redis_table(delete_data["node"]["data_list"])
+                self.node_base_operate.delete_redis_table(delete_data["node_base"]["data_list"])
+                # reload related redis table
+                self.nn_group_operate.reload_redis_table(
+                    db, self.nn_group_operate.reload_related_redis_tables, delete_data["nn_group"]["data_list"])
+                self.node_operate.reload_redis_table(
+                    db, self.node_operate.reload_related_redis_tables, delete_data["node"]["data_list"])
+                return "ok"
 
         return router
 
