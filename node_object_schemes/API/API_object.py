@@ -46,3 +46,10 @@ class APIObjectMultipleUpdate(APIObjectUpdate):
 class InsertValue(BaseModel):
     id: int
     value: str
+
+
+class GetValue(BaseModel):
+    id: int
+    object_id: str
+    value: str
+    timestamp: int

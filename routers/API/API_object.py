@@ -1,19 +1,27 @@
+import json
+import time
+
 import redis
 from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
+from app.value_trace import ValueQueue
 from node_object_function.API.API_object import APIObjectOperate
 from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
 from node_object_function.API.API_object import APIObjectFunction
 from node_object_function.General_operate import GeneralOperate
 from node_object_function.create_data_structure import create_update_dict, create_delete_dict
+from node_object_influxdb.influxdb import InfluxDB
 
 
 class APIObjectRouter(APIObjectFunction, APIObjectOperate):
-    def __init__(self, module, redis_db: redis.Redis, exc, db_session: sessionmaker):
+    def __init__(self, module, redis_db: redis.Redis, influxdb: InfluxDB,
+                 exc, db_session: sessionmaker, q: ValueQueue):
         self.db_session = db_session
+        self.influxdb = influxdb
+        self.q = q
         APIObjectOperate.__init__(self, module, redis_db, exc)
 
     def create(self):
@@ -27,6 +35,7 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
         update_schemas = self.update_schemas
         multiple_update_schemas = self.multiple_update_schemas
         insert_schemas = self.insert_schemas
+        get_value_schemas = self.get_value_schemas
 
         @router.on_event("startup")
         async def task_startup_event():
@@ -301,21 +310,40 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
         @router.put("/insert_value/")
         async def insert_value(insert_list: list[insert_schemas]):
             id_set = set()
+            id_value_dict: dict = dict()
+            insert_data: dict = dict()
             for data in insert_list:
+                id_value_dict[data.id] = data.value
                 id_set.add(data.id)
-            self.object_operate.read_data_from_redis_by_key_set(id_set)
-            for data in insert_list:
-                self.redis.hset("object_value", data.id, data.value)
+            object_list = self.object_operate.read_data_from_redis_by_key_set(id_set)
+            timestamp = int(time.time())
+            for data in object_list:
+                v = {
+                    "id": data["id"],
+                    "object_id": data["object_id"],
+                    "value": id_value_dict[data["id"]],
+                    "timestamp": timestamp
+                }
+                insert_data[data["id"]] = v
+                self.influxdb.write_in(data["id"], data["object_id"], id_value_dict[data["id"]])
+                self.redis.hset("object_value", data["id"], json.dumps(v))
+            self.q.insert_data(insert_data)
             return "ok"
 
-        @router.get("/value/", response_model=list[insert_schemas])
+        @router.get("/value/", response_model=list[get_value_schemas])
         async def get_value(id_list: list[int] = Query(...)):
             result = []
-            for id_data in id_list:
-                value = self.redis.hget("object_value", id_data)
-                if not value:
-                    raise self.exc(status_code=404, detail=f"id:{id_data} doesn't have value")
-                result.append(insert_schemas(id=id_data, value=value))
+            for _id in set(id_list):
+                data = self.redis.hget("object_value", _id)
+                if not data:
+                    raise self.exc(status_code=404, detail=f"id:{_id} doesn't have value")
+                data = json.loads(data)
+                result.append(get_value_schemas(id=_id, object_id=data["object_id"],
+                                                value=data["value"], timestamp=data["timestamp"]))
             return result
+
+        @router.get("/history_value/{_id}", response_model=list[get_value_schemas])
+        async def get_history_value(_id: int, start: int = Query(...), end: int = Query(None)):
+            return self.influxdb.query_by_id(_id, start, end)
 
         return router

@@ -23,6 +23,7 @@ class APIObjectOperate(GeneralOperate):
     def __init__(self, module, redis_db, exc):
         self.exc = exc
         self.insert_schemas = module.insert_schemas
+        self.get_value_schemas = module.get_value_schemas
         GeneralOperate.__init__(self, module, redis_db, exc)
         self.object_operate = GeneralOperate(node_object_data.object, redis_db, exc)
         self.object_base_operate = GeneralOperate(node_object_data.object_base, redis_db, exc)

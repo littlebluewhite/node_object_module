@@ -28,14 +28,17 @@ import node_object_data.object_template
 import node_object_data.control_href_group_template
 import node_object_data.control_href_item_template
 import node_object_data.fake_data_config_template
+from app.value_trace import ValueQueue
 
 from node_object_SQL import models
 from node_object_SQL.database import SQLDB
 from node_object_exception import NodeObjectException
+from node_object_influxdb.influxdb import InfluxDB
 from node_object_redis.redis import NodeRedis
 from routers.API.API_object import APIObjectRouter
 from routers.General_table_router import GeneralRouter
 from routers.API.API_node import APINodeRouter
+from routers.websockets import WebsocketsRouter
 
 node_object_app = FastAPI(title="node_object_app")
 
@@ -53,12 +56,16 @@ parser.add_argument("-rh", "--redis_host", help="Redis host", type=str)
 parser.add_argument("-rp", "--redis_port", help="Redis port", type=str)
 parser.add_argument("-dh", "--db_host", help="SQL DB host", type=str)
 parser.add_argument("-dp", "--db_port", help="SQL DB port", type=str)
+parser.add_argument("-ih", "--influx_host", help="InfluxDB host", type=str)
+parser.add_argument("-ip", "--influx_port", help="InfluxDB port", type=str)
 args = parser.parse_args()
 check_list = [
     {"arg": "redis_host", "cfg": ["Redis", "host"]},
     {"arg": "redis_port", "cfg": ["Redis", "port"]},
     {"arg": "db_host", "cfg": ["SQLDB", "host"]},
     {"arg": "db_port", "cfg": ["SQLDB", "port"]},
+    {"arg": "influx_host", "cfg": ["InfluxDB", "host"]},
+    {"arg": "influx_port", "cfg": ["InfluxDB", "port"]},
 ]
 
 # deal config
@@ -77,14 +84,19 @@ db = SQLDB(config["SQLDB"])
 #   create SQL models
 models.Base.metadata.create_all(bind=db.get_engine())
 
+# Influx DB
+influxdb = InfluxDB(config["InfluxDB"])
+
 #   create SQL session
 db_session = db.new_db_session()
-
+q = ValueQueue()
 # router
+node_object_app.include_router(WebsocketsRouter(q).create())
 node_object_app.include_router(APINodeRouter(node_object_data.API.API_node, redis_db,
                                              NodeObjectException, db_session).create())
 node_object_app.include_router(APIObjectRouter(node_object_data.API.API_object, redis_db,
-                                               NodeObjectException, db_session).create())
+                                               influxdb, NodeObjectException,
+                                               db_session, q).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node, redis_db,
                                              NodeObjectException, db_session).create())
 node_object_app.include_router(GeneralRouter(node_object_data.node_base, redis_db,

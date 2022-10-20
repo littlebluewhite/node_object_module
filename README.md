@@ -1,4 +1,4 @@
-# node_object_module version 1.0
+# node_object_module version 2.0
 
 * API node rule
   1. API node 包含四張表(node, node_base, device_info, third_dimension_instance)一對一關係
@@ -13,6 +13,12 @@
   3. object只能綁定一個node
   4. 跟object groups的關係是多對多
   5. insert object的value會完全取代原本的value, 只修改redis的表, 不修改sql
+* API object value
+  1. history value儲存在influxDB
+  2. latest value存redis和influxDB
+  3. 取得history value從influxDB讀取
+  4. 取得latest value從redis取
+  5. 取得即時有改變的資料使用websocket連線(ws://{host}:{port}/ws/)
 
 ## Design
 
