@@ -6,6 +6,8 @@ ENV db_host 127.0.0.1
 ENV redis_host 127.0.0.1
 ENV influx_host 127.0.0.1
 
+EXPOSE 9330
+
 COPY . .
 
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
