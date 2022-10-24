@@ -62,7 +62,7 @@ Delete Data
 1. build docker image "node_object"
    `docker build -t node_object:latest .`
 2. run node_object image
-   `docker run --name node_object -p 9330:9330 --network="host" node_object:latest`
+   `docker run --name node_object --network="host" -p 9330:9330 node_object:latest`
 
 ## Swagger API Document
 

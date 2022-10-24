@@ -99,12 +99,13 @@ class ThirdDimensionInstance(Base):
     image_url = Column(String(256))  # 該節點的影片路徑、網址
     area = Column(String(256))  # 描述節點所屬樓層、區域
     floor = Column(String(256))  # 描述節點所屬樓層
-    position = Column(JSON)  # {"x":0.0,"y":0.0,"z":0.0} 節點世界座標
-    rotation = Column(JSON)  # {"x":0.0,"y":0.0,"z":0.0} 節點旋轉Euler角(0.0~360.0)
-    scale = Column(JSON)  # {"x":0.0,"y":0.0,"z":0.0} 節點縮放大小
+    position = Column(String(256))  # {"x":0.0,"y":0.0,"z":0.0} 節點世界座標
+    rotation = Column(String(256))  # {"x":0.0,"y":0.0,"z":0.0} 節點旋轉Euler角(0.0~360.0)
+    scale = Column(String(256))  # {"x":0.0,"y":0.0,"z":0.0} 節點縮放大小
     model_url = Column(String(256))  # 節點的模型路徑 TODO 目前是第一版先以本地路徑、第二版是結合後端的FileSys指向雲端的路徑
     location_path = Column(String(256))  # 階層路徑 (或是用ParentId, 可為空<root>)
     layer_id = Column(Integer)  # 節點定義層級 (Building/Floor/Room/Device/Pipe/Sensor) TODO 也許透過 Node 概念來解決?
+    components = Column(JSON)
 
     node_id = Column(Integer, ForeignKey("node.id"), unique=True)
 
