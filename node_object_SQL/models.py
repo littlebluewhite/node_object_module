@@ -21,10 +21,12 @@ class ObjectObjectGroup(Base):
     object_group_id = Column('object_group_id', Integer, ForeignKey('object_group.id'))
     __table_args__ = (UniqueConstraint('object_id', 'object_group_id', name='_object_group_uc'),)
 
+
 class NodeBase(Base):
     __tablename__ = "node_base"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column(String(256))  # 節點名稱
     description = Column(String(256))  # 節點文字描述
     value = Column(String(256))
     node_type = Column(String(256), default=None)  # 節點資訊id，表示該節點對應到的資訊，用以反向查詢該節點的資訊索引
@@ -38,10 +40,7 @@ class Node(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     node_id = Column(String(256), unique=True, nullable=False)  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
-    name = Column(String(256))  # 節點名稱
     principal_name = Column(String(256))  # 節點負責人
-    last_maintain_date = Column(DateTime)  # 節點最後維護時間
-    next_maintain_date = Column(DateTime)  # 節點下次維護時間
     tags = Column(JSON)  # 節點標籤
     parent_node_id = Column(Integer, ForeignKey("node.id"))
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
@@ -62,7 +61,6 @@ class NodeTemplate(Base):
     __tablename__ = "node_template"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(256))  # 節點名稱
     node_template_id = Column(String(256))  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
     parent_node_id = Column(Integer, ForeignKey("node.id"))
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
@@ -117,12 +115,13 @@ class DeviceInfo(Base):
     __tablename__ = "device_info"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256))  # 節點資訊名稱
     company = Column(String(256))  # 節點廠商
     contact_name = Column(String(256))  # 節點聯絡人
     phone_number = Column(String(256))  # 節點廠商連絡電話
     email = Column(String(256))  # 節點廠商連絡電子郵件
     extra_info = Column(String(256))
+    last_maintain_date = Column(DateTime)  # 節點最後維護時間
+    next_maintain_date = Column(DateTime)  # 節點下次維護時間
 
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 

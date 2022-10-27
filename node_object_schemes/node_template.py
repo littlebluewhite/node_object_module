@@ -7,7 +7,6 @@ import node_object_schemes.object_template
 
 
 class NodeTemplateBasic(BaseModel):
-    name: str
     node_template_id: str
     parent_node_template_id: int | None = None
     node_base_id: int | None = None
@@ -32,7 +31,6 @@ class NodeTemplateCreate(NodeTemplateBasic):
 
 
 class NodeTemplateUpdate(NodeTemplateBasic):
-    name: str | None = None
     node_template_id: str | None = None
 
 

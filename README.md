@@ -48,7 +48,7 @@ Delete Data
 
 #### 1. Use docker-compose
 
-1. install mysql and redis
+1. install mysql and redis 
    `docker pull mssql`
    `docker pull redis`
 2. start docker-compose.yaml

@@ -39,7 +39,6 @@ class APINodeCreate(NodeBasic):
 
 
 class APIDeviceInfoUpdate(node_object_schemes.device_info.DeviceInfoBasic):
-    name: str | None = None
     company: str | None = None
     contact_name: str | None = None
     phone_number: str | None = None
@@ -52,7 +51,6 @@ class APINodeBaseUpdate(node_object_schemes.node_base.NodeBaseUpdate):
 
 class APINodeUpdate(NodeBasic):
     node_id: str | None = None
-    name: str | None = None
     tags: list[str] | None = None
     node_base: APINodeBaseUpdate = APINodeBaseUpdate()
     third_dimension_instance: node_object_schemes.third_dimension_instance.ThirdDimensionInstanceBasic | None = None
