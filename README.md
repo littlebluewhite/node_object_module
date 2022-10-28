@@ -48,20 +48,27 @@ Delete Data
 
 #### 1. Use docker-compose
 
-1. install mysql and redis 
+1. install mysql, redis and influxdb
+
    `docker pull mssql`
+
    `docker pull redis`
+
+    `docker pull influxdb`
 2. start docker-compose.yaml
+
    `docker-compose up`
 
 #### 2. Use Dockerfile
 
-需要先啟動mysql和redis
+需要先啟動mysql, redis, influxdb
 可用環境變數db_host, redis_host去改變sql和redis的連線ip
 
 1. build docker image "node_object"
+
    `docker build -t node_object:latest .`
 2. run node_object image
+
    `docker run --name node_object --network="host" -p 9330:9330 node_object:latest`
 
 ## Swagger API Document

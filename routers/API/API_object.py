@@ -65,7 +65,7 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
             return [self.format_api_object(i) for i in nodes]
 
         @router.post("/", response_model=self.main_schemas)
-        async def create_api_node(create_data: create_schemas,
+        async def create_api_object(create_data: create_schemas,
                                   db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
                 create_dict = create_data.dict()

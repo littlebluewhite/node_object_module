@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11.0-alpine
 
 WORKDIR /app
 
@@ -12,4 +12,4 @@ COPY . .
 
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 
-CMD python3.10 node_object_main.py --db_host=$db_host --redis_host=$redis_host --influx_host=$influx_host
+CMD python3.11 node_object_main.py --db_host=$db_host --redis_host=$redis_host --influx_host=$influx_host
