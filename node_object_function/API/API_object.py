@@ -14,7 +14,7 @@ class APIObjectFunction:
     def format_api_object(obj: dict):
         object_groups = []
         for item in obj["object_groups"]:
-            object_groups.append(item["id"])
+            object_groups.append(item["object_group_id"])
         obj["object_groups"] = object_groups
         return obj
 
