@@ -5,8 +5,8 @@ import node_object_schemes.device_info
 
 class NodeBaseBasic(BaseModel):
     name: str
-    description: str
-    value: str
+    description: str | None = None
+    value: str | None = None
     node_type: str
 
 
@@ -25,8 +25,6 @@ class NodeBaseCreate(NodeBaseBasic):
 
 class NodeBaseUpdate(NodeBaseBasic):
     name: str | None = None
-    description: str | None = None
-    value: str | None = None
     node_type: str | None = None
 
 

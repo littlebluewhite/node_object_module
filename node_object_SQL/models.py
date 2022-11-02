@@ -39,7 +39,7 @@ class Node(Base):
     __tablename__ = "node"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    node_id = Column(String(256), unique=True, nullable=False)  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
+    node_id = Column(String(256), unique=True)  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
     principal_name = Column(String(256))  # 節點負責人
     tags = Column(JSON)  # 節點標籤
     parent_node_id = Column(Integer, ForeignKey("node.id"))
