@@ -28,7 +28,7 @@ class ChildNode(BaseModel):
 
 
 class NodeBasic(BaseModel):
-    node_id: str
+    node_id: str | None = None
     principal_name: str | None = None
     tags: list[str] = list()
     parent_node_id: int | None = None
@@ -58,7 +58,6 @@ class NodeCreate(NodeBasic):
 
 
 class NodeUpdate(NodeBasic):
-    node_id: str | None = None
     node_base_id: int | None = None
     tags: list[str] | None = None
 
