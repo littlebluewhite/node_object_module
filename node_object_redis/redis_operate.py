@@ -44,6 +44,8 @@ class RedisOperate:
                 # sql type 是 json list的情況
                 if isinstance(getattr(row, key), list):
                     for item in getattr(row, key):
+                        if item is None:
+                            continue
                         value_list = list()
                         original_data = self.redis.hget(table_name, item)
                         if original_data:
@@ -52,11 +54,12 @@ class RedisOperate:
                 # sql type 是單一值的情況
                 else:
                     item = getattr(row, key)
-                    value_list = list()
-                    original_data = self.redis.hget(table_name, item)
-                    if original_data:
-                        value_list = json.loads(original_data)
-                    self.redis.hset(table_name, item, json.dumps(list(set(value_list+[row.id]))))
+                    if item is not None:
+                        value_list = list()
+                        original_data = self.redis.hget(table_name, item)
+                        if original_data:
+                            value_list = json.loads(original_data)
+                        self.redis.hset(table_name, item, json.dumps(list(set(value_list+[row.id]))))
             result.append(row)
         return result
 
@@ -101,6 +104,8 @@ class RedisOperate:
                 # sql type 是 json list的情況
                 if isinstance(getattr(row, key), list):
                     for item in getattr(row, key):
+                        if item is None:
+                            continue
                         value_list = json.loads(self.redis.hget(table_name, item))
                         value_list.remove(row.id)
                         if not value_list:
@@ -110,10 +115,11 @@ class RedisOperate:
                 # sql type 是單一值的情況
                 else:
                     item = getattr(row, key)
-                    value_list = json.loads(self.redis.hget(table_name, item))
-                    value_list.remove(row.id)
-                    if not value_list:
-                        self.redis.hdel(table_name, item)
-                    else:
-                        self.redis.hset(table_name, item, json.dumps(value_list))
+                    if item is not None:
+                        value_list = json.loads(self.redis.hget(table_name, item))
+                        value_list.remove(row.id)
+                        if not value_list:
+                            self.redis.hdel(table_name, item)
+                        else:
+                            self.redis.hset(table_name, item, json.dumps(value_list))
         return "Ok"
