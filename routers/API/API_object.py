@@ -336,7 +336,7 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
             for _id in set(id_list):
                 data = self.redis.hget("object_value", _id)
                 if not data:
-                    raise self.exc(status_code=404, detail=f"id:{_id} doesn't have value")
+                    continue
                 data = json.loads(data)
                 result.append(get_value_schemas(id=_id, object_id=data["object_id"],
                                                 value=data["value"], timestamp=data["timestamp"]))

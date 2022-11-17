@@ -44,8 +44,6 @@ class RedisOperate:
                 # sql type 是 json list的情況
                 if isinstance(getattr(row, key), list):
                     for item in getattr(row, key):
-                        if item is None:
-                            continue
                         value_list = list()
                         original_data = self.redis.hget(table_name, item)
                         if original_data:
@@ -54,6 +52,7 @@ class RedisOperate:
                 # sql type 是單一值的情況
                 else:
                     item = getattr(row, key)
+                    # key可能為空值得情況
                     if item is not None:
                         value_list = list()
                         original_data = self.redis.hget(table_name, item)
@@ -104,8 +103,6 @@ class RedisOperate:
                 # sql type 是 json list的情況
                 if isinstance(getattr(row, key), list):
                     for item in getattr(row, key):
-                        if item is None:
-                            continue
                         value_list = json.loads(self.redis.hget(table_name, item))
                         value_list.remove(row.id)
                         if not value_list:
@@ -115,6 +112,7 @@ class RedisOperate:
                 # sql type 是單一值的情況
                 else:
                     item = getattr(row, key)
+                    # key可能為空值得情況
                     if item is not None:
                         value_list = json.loads(self.redis.hget(table_name, item))
                         value_list.remove(row.id)
