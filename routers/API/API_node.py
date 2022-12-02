@@ -1,12 +1,13 @@
 import redis
+
 from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
 from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
-from node_object_function.API.API_node import APINodeOperate
-from node_object_function.create_data_structure import create_update_dict
+from function.API.API_node import APINodeOperate
+from function.create_data_structure import create_update_dict
 
 
 class APINodeRouter(APINodeOperate):
@@ -73,7 +74,7 @@ class APINodeRouter(APINodeOperate):
                 db.refresh(node_base)
                 db.refresh(node)
 
-                # redis create data
+                # redis_db create data
                 if create_dict["node_base"]["device_info"]:
                     self.device_info_operate.update_redis_table(device_info_list)
                 if create_dict["third_dimension_instance"]:
@@ -81,7 +82,7 @@ class APINodeRouter(APINodeOperate):
                 self.node_base_operate.update_redis_table([node_base])
                 self.node_operate.update_redis_table([node])
 
-                # redis reload table --> parent node
+                # redis_db reload table --> parent node
                 self.node_operate.reload_redis_table(db, self.node_operate.reload_related_redis_tables, [node])
 
                 return jsonable_encoder(node)
@@ -183,17 +184,17 @@ class APINodeRouter(APINodeOperate):
                 node_base_list = self.node_base_operate.update_sql(db, [node_base_update])
                 node_update = self.node_operate.multiple_update_schemas(**update_dict, id=original_node_data["id"])
                 node_list = self.node_operate.update_sql(db, [node_update])
-                # delete index redis table
+                # delete index redis_db table
                 self.node_base_operate.delete_redis_index_table([original_node_data["node_base"]], [node_base_update])
                 self.node_operate.delete_redis_index_table([original_node_data], [node_update])
-                # update redis table
+                # update redis_db table
                 if device_info_list:
                     self.device_info_operate.update_redis_table(device_info_list)
                 if tdi_list:
                     self.third_d_operate.update_redis_table(tdi_list)
                 self.node_base_operate.update_redis_table(node_base_list)
                 self.node_operate.update_redis_table(node_list)
-                # reload related redis table
+                # reload related redis_db table
                 self.node_operate.reload_redis_table(db, self.node_operate.reload_related_redis_tables,
                                                      node_list, self_ref_id_dict)
                 return self.format_api_node(jsonable_encoder(node_list[0]))
@@ -239,8 +240,8 @@ class APINodeRouter(APINodeOperate):
                 tdi["sql_list"].extend(self.third_d_operate.update_sql(db, tdi["update_list"]))
                 node_base["sql_list"].extend(self.node_base_operate.update_sql(db, node_base["update_list"]))
                 node["sql_list"].extend(self.node_operate.update_sql(db, node["update_list"]))
-                # redis operate
-                # redis delete index table
+                # redis_db operate
+                # redis_db delete index table
                 self.device_info_operate.delete_redis_index_table(
                     [i["node_base"]["device_info"] for i in original_data_list if i["node_base"]["device_info"]],
                     device_info["update_list"])
@@ -250,12 +251,12 @@ class APINodeRouter(APINodeOperate):
                 self.node_base_operate.delete_redis_index_table([i["node_base"] for i in original_data_list],
                                                                 node_base["update_list"])
                 self.node_operate.delete_redis_index_table([i for i in original_data_list], node["update_list"])
-                # update redis table
+                # update redis_db table
                 self.device_info_operate.update_redis_table(device_info["sql_list"])
                 self.third_d_operate.update_redis_table(tdi["sql_list"])
                 self.node_base_operate.update_redis_table(node_base["sql_list"])
                 self.node_operate.update_redis_table(node["sql_list"])
-                # reload related redis table
+                # reload related redis_db table
                 self.node_operate.reload_redis_table(db, self.node_operate.reload_related_redis_tables,
                                                      node["sql_list"], self_ref_id_dict)
                 return [self.format_api_node(i) for i in jsonable_encoder(node["sql_list"])]
@@ -273,13 +274,13 @@ class APINodeRouter(APINodeOperate):
                     id_set = delete_data["node"]["stack"].pop()
                     self.node_operate.delete_sql(db, id_set, False)
                 self.node_base_operate.delete_sql(db, delete_data["node_base"]["id_set"], False)
-                # delete redis table
+                # delete redis_db table
                 self.nn_group_operate.delete_redis_table(delete_data["nn_group"]["data_list"])
                 self.third_d_operate.delete_redis_table(delete_data["tdi"]["data_list"])
                 self.device_info_operate.delete_redis_table(delete_data["device_info"]["data_list"])
                 self.node_operate.delete_redis_table(delete_data["node"]["data_list"])
                 self.node_base_operate.delete_redis_table(delete_data["node_base"]["data_list"])
-                # reload related redis table
+                # reload related redis_db table
                 self.nn_group_operate.reload_redis_table(
                     db, self.nn_group_operate.reload_related_redis_tables, delete_data["nn_group"]["data_list"])
                 self.node_operate.reload_redis_table(

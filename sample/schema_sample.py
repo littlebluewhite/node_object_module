@@ -2,9 +2,9 @@
 #
 # from pydantic import BaseModel
 #
-# import node_object_schemes.third_dimension_instance
-# import node_object_schemes.node_base
-# import node_object_schemes.object
+# import schemas.third_dimension_instance
+# import schemas.node_base
+# import schemas.object
 #
 #
 # class NodeGroup(BaseModel):
@@ -37,11 +37,11 @@
 #     create_at: datetime.datetime
 #     update_at: datetime.datetime
 #
-#     node_base: node_object_schemes.node_base.NodeBase | None = None
+#     node_base: schemas.node_base.NodeBase | None = None
 #     child_nodes: list = list()
-#     third_dimension_instance: node_object_schemes.third_dimension_instance.ThirdDimensionInstance | None = None
+#     third_dimension_instance: schemas.third_dimension_instance.ThirdDimensionInstance | None = None
 #     node_groups: list[NodeGroup] = list()
-#     objects: list[node_object_schemes.object.Object] = list()
+#     objects: list[schemas.object.Object] = list()
 #
 #     class Config:
 #         orm_mode = True

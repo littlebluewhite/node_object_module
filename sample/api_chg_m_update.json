@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "test1_m_m",
+    "tags": [
+      "a", "b"
+    ],
+    "control_href_items": [
+      {
+        "id": 1,
+        "name": "1a_m"
+      },
+      {
+        "name": "1d",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "test3_m",
+    "tags": [
+      "c", "3"
+    ],
+    "control_href_items": [
+      {
+        "id": 6,
+        "name": "3b_m"
+      },
+      {
+        "name": "3c",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      },
+      {
+        "name": "3d",
+        "control_data": "dd",
+        "color": "d",
+        "tags": ["3d"]
+      }
+    ]
+  }
+]

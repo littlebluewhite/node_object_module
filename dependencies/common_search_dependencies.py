@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import Query, Depends
 
-from node_object_function import search_function
+from function import search_function
 
 
 async def common_search(_range: list[str] | None = Query(None),

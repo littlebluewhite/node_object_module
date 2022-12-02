@@ -7,13 +7,13 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
 from app.value_trace import ValueQueue
-from node_object_function.API.API_object import APIObjectOperate
+from function.API.API_object import APIObjectOperate
 from dependencies.common_search_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
-from node_object_function.API.API_object import APIObjectFunction
-from node_object_function.General_operate import GeneralOperate
-from node_object_function.create_data_structure import create_update_dict, create_delete_dict
-from node_object_influxdb.influxdb import InfluxDB
+from function.API.API_object import APIObjectFunction
+from function.General_operate import GeneralOperate
+from function.create_data_structure import create_update_dict, create_delete_dict
+from app.influxdb.influxdb import InfluxDB
 
 
 class APIObjectRouter(APIObjectFunction, APIObjectOperate):

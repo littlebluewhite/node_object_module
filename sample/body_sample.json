@@ -1,0 +1,56 @@
+[
+  {
+    "name": "test1",
+    "tags": [],
+    "control_href_items": [
+      {
+        "name": "1a",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      },
+      {
+        "name": "1b",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      }
+    ]
+  },
+  {
+    "name": "test2",
+    "tags": [],
+    "control_href_items": [
+      {
+        "name": "2a",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      },
+      {
+        "name": "2b",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      }
+    ]
+  },
+  {
+    "name": "test3",
+    "tags": [],
+    "control_href_items": [
+      {
+        "name": "3a",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      },
+      {
+        "name": "3b",
+        "control_data": "string",
+        "color": "string",
+        "tags": []
+      }
+    ]
+  }
+]
