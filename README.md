@@ -19,6 +19,10 @@
   3. 取得history value從influxDB讀取
   4. 取得latest value從redis取
   5. 取得即時有改變的資料使用websocket連線(ws://{host}:{port}/ws/)
+* API control href group
+  1. create 可以創建group 和 item
+  2. update 如果item有帶id就是修改, 如果沒有帶id就是創建新的item
+  3. delete 會連同底下item一起刪除
 
 ## Design
 
