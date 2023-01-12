@@ -33,8 +33,8 @@ class APINode(NodeBasic):
 
 class APINodeSimple(BaseModel):
     id: int
-    uid: str
-    name: str
+    uid: str | None
+    name: str | None
 
 
 class APINodeBaseCreate(schemas.node_base.NodeBaseCreate):

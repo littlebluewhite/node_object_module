@@ -25,8 +25,8 @@ class APIObject(ObjectBasic):
 
 class APIObjectSimple(BaseModel):
     id: int
-    uid: str
-    name: str
+    uid: str | None
+    name: str | None
 
 
 class APIObjectCreate(ObjectBasic):

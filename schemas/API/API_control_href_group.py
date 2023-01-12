@@ -13,8 +13,8 @@ class APIControlHrefItemBasic(BaseModel):
 
 class APIControlHrefGroupSimple(BaseModel):
     id: int
-    uid: str
-    name: str
+    uid: str | None
+    name: str | None
 
 
 class APIControlHrefItem(APIControlHrefItemBasic):
