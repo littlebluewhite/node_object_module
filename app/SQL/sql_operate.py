@@ -38,7 +38,7 @@ class SQLOperate:
         return data_list
 
     @staticmethod
-    def get_all_sql_data(db: Session, sql_model):
+    def get_all_sql_data(db: Session, sql_model) -> list:
         skip: int = 0
         limit: int = 100
         result = list()

@@ -2,9 +2,6 @@ import datetime
 
 from pydantic import BaseModel
 
-import schemas.node_base
-import schemas.third_dimension_instance
-
 
 class NodeNodeGroup(BaseModel):
     node_id: int
@@ -16,7 +13,7 @@ class NodeNodeGroup(BaseModel):
 class NodeGroupBasic(BaseModel):
     name: str
     is_topics: bool = True
-    description: str
+    description: str | None = None
 
 
 class NodeGroup(NodeGroupBasic):

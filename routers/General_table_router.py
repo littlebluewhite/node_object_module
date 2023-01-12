@@ -2,7 +2,7 @@ import redis
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm import sessionmaker, Session
 
-from dependencies.common_search_dependencies import CommonQuery
+from dependencies.get_query_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
 from function.General_operate import GeneralOperate
 
@@ -46,6 +46,10 @@ class GeneralRouter(GeneralOperate):
         @router.get("/{table_id}", response_model=self.main_schemas)
         async def get_by_id(table_id):
             return GeneralOperate.read_data_from_redis_by_key_set(self, {table_id})[0]
+
+        @router.get("/table_count/")
+        async def get_table_count():
+            return GeneralOperate.read_table_count(self)
 
         @router.post("/", response_model=self.main_schemas)
         async def create(create_data: create_schemas,

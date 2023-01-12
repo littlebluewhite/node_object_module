@@ -11,6 +11,12 @@ class APIControlHrefItemBasic(BaseModel):
     tags: list[str] = list()
 
 
+class APIControlHrefGroupSimple(BaseModel):
+    id: int
+    uid: str
+    name: str
+
+
 class APIControlHrefItem(APIControlHrefItemBasic):
     id: int
     tags: list[str]

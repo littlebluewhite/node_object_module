@@ -18,6 +18,14 @@ class APIObjectFunction:
         obj["object_groups"] = object_groups
         return obj
 
+    @staticmethod
+    def format_simple_api_object(obj:dict) -> dict:
+        return {
+            "id": obj["id"],
+            "uid": obj["object_id"],
+            "name": obj["name"],
+        }
+
 
 class APIObjectOperate(GeneralOperate):
     def __init__(self, module, redis_db, exc):

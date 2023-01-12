@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import Query, Depends
 
 from function import search_function
@@ -29,5 +27,11 @@ class CommonQuery:
             self.where_command = where_command
         else:
             self.pattern = "all"
+        self.skip = skip
+        self.limit = limit
+
+
+class SimpleQuery:
+    def __init__(self, skip: int = Query(None), limit: int = Query(None)):
         self.skip = skip
         self.limit = limit

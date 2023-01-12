@@ -1,5 +1,7 @@
 import datetime
 
+from pydantic import BaseModel
+
 import schemas.node_base
 import schemas.third_dimension_instance
 import schemas.device_info
@@ -27,6 +29,12 @@ class APINode(NodeBasic):
 
     node_base: APINodeBase | None = None
     third_dimension_instance: API3DI | None = None
+
+
+class APINodeSimple(BaseModel):
+    id: int
+    uid: str
+    name: str
 
 
 class APINodeBaseCreate(schemas.node_base.NodeBaseCreate):

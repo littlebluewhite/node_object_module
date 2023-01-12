@@ -23,6 +23,12 @@ class APIObject(ObjectBasic):
     object_groups: list = list()
 
 
+class APIObjectSimple(BaseModel):
+    id: int
+    uid: str
+    name: str
+
+
 class APIObjectCreate(ObjectBasic):
     object_base: ObjectBaseBasic
     fake_data_config: APIFdc | None = None

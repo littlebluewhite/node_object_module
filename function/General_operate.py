@@ -28,11 +28,12 @@ class GeneralOperate(RedisOperate, SQLOperate):
         db = db_session()
         # sql 取資料
         sql_data = SQLOperate.get_all_sql_data(db, self.sql_model)
+        self.write_to_redis("count", self.module.name, len(sql_data))
         for table in self.redis_tables:
             # 清除redis表
-            RedisOperate.clean_redis_by_name(self, table["name"])
+            self.clean_redis_by_name(table["name"])
             # 將sql資料寫入redis表
-            RedisOperate.write_sql_data_to_redis(self, table["name"], sql_data, self.main_schemas, table["key"])
+            self.write_sql_data_to_redis(table["name"], sql_data, self.main_schemas, table["key"])
         db.close()
 
     def reload_redis_table(self, db, reload_related_redis_tables, sql_data_list, origin_ref_id_dict=None):
@@ -86,6 +87,9 @@ class GeneralOperate(RedisOperate, SQLOperate):
     def read_data_from_redis_by_key_set(self, key_set: set, table_index: int = 0) -> list:
         return RedisOperate.read_redis_data(self, self.redis_tables[table_index]["name"], key_set)
 
+    def read_table_count(self):
+        return self.read_redis_data("count", {self.module.name})[0]
+
     def create_data(self, db: Session, data_list: list) -> list:
         sql_data_list = self.create_sql(db, data_list)
         self.update_redis_table(sql_data_list)
@@ -129,13 +133,19 @@ class GeneralOperate(RedisOperate, SQLOperate):
         return self.multiple_update_schemas(**update_data.dict(), id=data_id)
 
     def create_sql(self, db, data_list: list) -> list:
-        return SQLOperate.create_multiple_sql_data(self, db, data_list, self.sql_model)
+        sql_data_list = SQLOperate.create_multiple_sql_data(self, db, data_list, self.sql_model)
+        c = self.read_table_count()
+        self.write_to_redis("count", self.module.name, len(sql_data_list)+c)
+        return sql_data_list
 
     def update_sql(self, db, update_list: list) -> list:
         return SQLOperate.update_multiple_sql_data(self, db, update_list, self.sql_model)
 
     def delete_sql(self, db, id_set: set, return_sql: bool = True) -> list:
-        return SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model, return_sql)
+        sql_data_list = SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model, return_sql)
+        c = self.read_table_count()
+        self.write_to_redis("count", self.module.name, c-len(id_set))
+        return sql_data_list
 
     def update_redis_table(self, sql_data_list: list):
         for table in self.redis_tables:

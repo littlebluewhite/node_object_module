@@ -6,6 +6,7 @@ redis_tables = [
 ]
 sql_model = models.Object
 main_schemas = API_object.APIObject
+simple_schemas = API_object.APIObjectSimple
 create_schemas = API_object.APIObjectCreate
 update_schemas = API_object.APIObjectUpdate
 multiple_update_schemas = API_object.APIObjectMultipleUpdate

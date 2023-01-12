@@ -15,6 +15,9 @@ class RedisOperate:
             if self.redis.delete(table_name) == 1:
                 print(f"clean redis table: {table_name}")
 
+    def write_to_redis(self, table_name: str, key: str, value: str | int):
+        self.redis.hset(table_name, key, value)
+
     def write_sql_data_to_redis(self, table_name: str,
                                 sql_data_list: list, schemas_model,
                                 key: str = "id", update_list: list = None) -> list:

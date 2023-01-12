@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
-from dependencies.common_search_dependencies import CommonQuery
+from dependencies.get_query_dependencies import CommonQuery, SimpleQuery
 from dependencies.db_dependencies import create_get_db
 from function.API.API_node import APINodeOperate
 from function.create_data_structure import create_update_dict
@@ -13,6 +13,7 @@ from function.create_data_structure import create_update_dict
 class APINodeRouter(APINodeOperate):
     def __init__(self, module, redis_db: redis.Redis, exc, db_session: sessionmaker):
         self.db_session = db_session
+        self.simple_schemas = module.simple_schemas
         APINodeOperate.__init__(self, module, redis_db, exc)
 
     def create(self):
@@ -35,6 +36,11 @@ class APINodeRouter(APINodeOperate):
                 id_set = self.node_operate.execute_sql_where_command(db, common.where_command)
                 nodes = self.node_operate.read_data_from_redis_by_key_set(id_set)[common.skip:][:common.limit]
             return [self.format_api_node(i) for i in nodes]
+
+        @router.get("/simple/", response_model=list[self.simple_schemas])
+        async def get_simple_nodes(common: SimpleQuery = Depends()):
+            nodes = self.node_operate.read_all_data_from_redis()[common.skip:][:common.limit]
+            return [self.format_simple_api_node(node) for node in nodes]
 
         @router.get("/by_node_id/", response_model=list[self.main_schemas])
         async def get_nodes_by_node_id(common: CommonQuery = Depends(),
@@ -231,7 +237,7 @@ class APINodeRouter(APINodeOperate):
                             **data["third_dimension_instance"], id=original_tdi["id"]))
                     node_base["update_list"].append(self.node_base_operate.multiple_update_schemas(
                         **data["node_base"], id=original_node_base["id"]))
-                    node["update_list"] .append(self.node_operate.multiple_update_schemas(
+                    node["update_list"].append(self.node_operate.multiple_update_schemas(
                         **data))
                 # DB operate
                 device_info["sql_list"].extend(self.device_info_operate.create_sql(db, device_info["create_list"]))
@@ -264,37 +270,11 @@ class APINodeRouter(APINodeOperate):
         @router.delete("/{node_id}")
         async def delete_api_node(node_id: int, db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
-                delete_data = self.get_delete_data({node_id})
-                print(delete_data)
-                self.api_object_operate.delete_multiple_object(delete_data["object"]["id_set"], db)
-                self.nn_group_operate.delete_sql(db, delete_data["nn_group"]["id_set"], False)
-                self.third_d_operate.delete_sql(db, delete_data["tdi"]["id_set"], False)
-                self.device_info_operate.delete_sql(db, delete_data["device_info"]["id_set"], False)
-                while delete_data["node"]["stack"]:
-                    id_set = delete_data["node"]["stack"].pop()
-                    self.node_operate.delete_sql(db, id_set, False)
-                self.node_base_operate.delete_sql(db, delete_data["node_base"]["id_set"], False)
-                # delete redis_db table
-                self.nn_group_operate.delete_redis_table(delete_data["nn_group"]["data_list"])
-                self.third_d_operate.delete_redis_table(delete_data["tdi"]["data_list"])
-                self.device_info_operate.delete_redis_table(delete_data["device_info"]["data_list"])
-                self.node_operate.delete_redis_table(delete_data["node"]["data_list"])
-                self.node_base_operate.delete_redis_table(delete_data["node_base"]["data_list"])
-                # reload related redis_db table
-                self.nn_group_operate.reload_redis_table(
-                    db, self.nn_group_operate.reload_related_redis_tables, delete_data["nn_group"]["data_list"])
-                self.node_operate.reload_redis_table(
-                    db, self.node_operate.reload_related_redis_tables, delete_data["node"]["data_list"])
-                return "ok"
+                return self.delete_nodes(db, {node_id})
+
+        @router.delete("/multiple/")
+        async def delete_api_nodes(id_set: set[int], db: Session = Depends(create_get_db(self.db_session))):
+            with db.begin():
+                return self.delete_nodes(db, id_set)
 
         return router
-
-
-
-
-
-
-
-
-
-

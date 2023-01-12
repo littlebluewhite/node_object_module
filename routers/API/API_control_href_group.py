@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
-from dependencies.common_search_dependencies import CommonQuery
+from dependencies.get_query_dependencies import CommonQuery, SimpleQuery
 from dependencies.db_dependencies import create_get_db
 from function.API.API_control_href_group import APIControlHrefGroupOperate
 from function.create_data_structure import create_update_dict, create_delete_dict
@@ -11,6 +11,7 @@ from function.create_data_structure import create_update_dict, create_delete_dic
 class APIControlHrefGroup(APIControlHrefGroupOperate):
     def __init__(self, module, redis_db, exc, db_session: sessionmaker):
         self.db_session = db_session
+        self.simple_schemas = module.simple_schemas
         APIControlHrefGroupOperate.__init__(self, module, redis_db, exc)
 
     def create(self):
@@ -33,6 +34,11 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 id_set = self.chg_operate.execute_sql_where_command(db, common.where_command)
                 chg = self.chg_operate.read_data_from_redis_by_key_set(id_set)[common.skip:][:common.limit]
             return chg
+
+        @router.get("/simple/", response_model=list[self.simple_schemas])
+        async def get_simple_objects(common: SimpleQuery = Depends()):
+            chgs = self.chg_operate.read_all_data_from_redis()[common.skip:][:common.limit]
+            return [self.format_simple_api_chg(chg) for chg in chgs]
 
         @router.post("/", response_model=self.main_schemas)
         async def create_api_control_href_group(create_data: create_schemas,

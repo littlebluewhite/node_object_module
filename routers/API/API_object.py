@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from app.value_trace import ValueQueue
 from function.API.API_object import APIObjectOperate
-from dependencies.common_search_dependencies import CommonQuery
+from dependencies.get_query_dependencies import CommonQuery, SimpleQuery
 from dependencies.db_dependencies import create_get_db
 from function.API.API_object import APIObjectFunction
 from function.General_operate import GeneralOperate
@@ -21,6 +21,7 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
                  exc, db_session: sessionmaker, q: ValueQueue):
         self.db_session = db_session
         self.influxdb = influxdb
+        self.simple_schemas = module.simple_schemas
         self.q = q
         APIObjectOperate.__init__(self, module, redis_db, exc)
 
@@ -51,6 +52,11 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
                 objects = self.object_operate.read_data_from_redis_by_key_set(id_set)[common.skip:][:common.limit]
             return [self.format_api_object(i) for i in objects]
 
+        @router.get("/simple/", response_model=list[self.simple_schemas])
+        async def get_simple_objects(common: SimpleQuery = Depends()):
+            objects = self.object_operate.read_all_data_from_redis()[common.skip:][:common.limit]
+            return [self.format_simple_api_object(obj) for obj in objects]
+
         @router.get("/by_object_id/", response_model=list[self.main_schemas])
         async def get_objects_by_object_id(common: CommonQuery = Depends(),
                                            key: str = Query(...),
@@ -66,7 +72,7 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
 
         @router.post("/", response_model=self.main_schemas)
         async def create_api_object(create_data: create_schemas,
-                                  db: Session = Depends(create_get_db(self.db_session))):
+                                    db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
                 create_dict = create_data.dict()
                 object_base_create = self.object_base_operate.create_schemas(**create_dict["object_base"])
