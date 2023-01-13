@@ -40,12 +40,15 @@ class SQLOperate:
     @staticmethod
     def get_all_sql_data(db: Session, sql_model) -> list:
         skip: int = 0
-        limit: int = 100
+        limit: int = 500
         result = list()
-        while db.query(sql_model).offset(skip).limit(limit).all():
-            result += db.query(sql_model).offset(skip).limit(limit).all()
-            skip = limit
-            limit += 100
+        while True:
+            d = db.query(sql_model).offset(skip).limit(limit).all()
+            if len(d) > 0:
+                result.extend(d)
+                skip += limit
+            else:
+                break
         return [jsonable_encoder(i) for i in result]
 
     def update_multiple_sql_data(self, db: Session, update_list: list, sql_model):
