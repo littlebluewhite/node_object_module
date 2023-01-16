@@ -2,3 +2,4 @@
 /deploy/influxdb/data/
 /deploy/redis/
 /deploy/sql_mount/
+.idea

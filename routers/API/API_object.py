@@ -159,13 +159,15 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
                 self_ref_id_dict = self.object_operate.get_self_ref_id(
                     [self.object_operate.main_schemas(**original_o_data)])
                 if not original_o_data["fake_data_config"] and update_dict["fake_data_config"]:
-                    fdc_base["create_list"].append(self.fdcBase_operate.create_schemas(
-                        **update_dict["fake_data_config"]["fake_data_config_base"]))
+                    if update_dict["fake_data_config"]["fake_data_config_base"]:
+                        fdc_base["create_list"].append(self.fdcBase_operate.create_schemas(
+                            **update_dict["fake_data_config"]["fake_data_config_base"]))
+                    else:
+                        fdc_base["create_list"].append(self.fdcBase_operate.create_schemas())
                     fdc_base["sql_list"].extend(self.fdcBase_operate.create_sql(db, fdc_base["create_list"]))
                     fdc["create_list"].append(self.fdc_operate.create_schemas(
                         **update_dict["fake_data_config"], object_id=object_id,
                         fake_data_config_base_id=fdc_base["sql_list"][0].id))
-                    fdc["sql_list"].extend(self.fdc_operate.create_sql(db, fdc["create_list"]))
                 elif original_o_data["fake_data_config"] and update_dict["fake_data_config"]:
                     if update_dict["fake_data_config"]["fake_data_config_base"]:
                         fdc_base["update_list"].append(self.fdcBase_operate.multiple_update_schemas(
@@ -222,8 +224,11 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
                     original_o_base: dict = original_o["object_base"]
                     original_fdc = original_o["fake_data_config"]
                     if not original_fdc and data["fake_data_config"]:
-                        fdc_base["create_list"].append(self.fdcBase_operate.create_schemas(
-                            **data["fake_data_config"]["fake_data_config_base"]))
+                        if data["fake_data_config"]["fake_data_config_base"]:
+                            fdc_base["create_list"].append(self.fdcBase_operate.create_schemas(
+                                **data["fake_data_config"]["fake_data_config_base"]))
+                        else:
+                            fdc_base["create_list"].append(self.fdcBase_operate.create_schemas())
                         fdc["create_list"].append(self.fdc_operate.create_schemas(
                             **data["fake_data_config"], object_id=original_o["id"]))
                     elif original_fdc and data["fake_data_config"]:
