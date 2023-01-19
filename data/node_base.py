@@ -20,6 +20,6 @@ reload_related_redis_tables = {
     "outside_field":
         [
             {"module": data.node, "field": "node_base_id"},
-            {"module": data.node_template, "field": "node_template_id"},
+            {"module": data.node_template, "field": "node_base_id"},
         ]
 }
