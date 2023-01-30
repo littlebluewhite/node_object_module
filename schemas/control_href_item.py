@@ -13,7 +13,7 @@ class ControlHrefItemBasic(BaseModel):
 
 class ControlHrefItem(ControlHrefItemBasic):
     id: int
-    tags: list[str]
+    tags: list[str] | None = list()
 
     create_at: datetime.datetime
     update_at: datetime.datetime
@@ -23,7 +23,7 @@ class ControlHrefItem(ControlHrefItemBasic):
 
 
 class ControlHrefItemCreate(ControlHrefItemBasic):
-    pass
+    tags: list[str] | None = list()
 
 
 class ControlHrefItemUpdate(ControlHrefItemBasic):

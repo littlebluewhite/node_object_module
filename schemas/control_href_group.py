@@ -7,7 +7,7 @@ import schemas.control_href_item
 
 class ControlHrefGroupBasic(BaseModel):
     name: str
-    tags: list[str] = list()
+    tags: list[str] | None = list()
 
 
 class ControlHrefGroup(ControlHrefGroupBasic):

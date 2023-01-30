@@ -128,8 +128,11 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                     chg["update_list"].append(self.chg_operate.multiple_update_schemas(**data.dict()))
                     for i in data.control_href_items:
                         if i.id is None:
-                            chi["create_list"].append(self.chi_operate.create_schemas(
-                                **i.dict(), control_href_group_id=data.id))
+                            chi_create_data = self.chi_operate.create_schemas(
+                                **i.dict(), control_href_group_id=data.id)
+                            if chi_create_data.tags is None:
+                                chi_create_data.tags = []
+                            chi["create_list"].append(chi_create_data)
                         else:
                             chi_id_set.add(i.id)
                             chi["update_list"].append(self.chi_operate.multiple_update_schemas(**i.dict()))
