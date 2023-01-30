@@ -1,4 +1,4 @@
-# node_object_module version 2.2.4
+# node_object_module version 2.2.5
 
 * API node rule
   1. API node 包含四張表(node, node_base, device_info, third_dimension_instance)一對一關係
