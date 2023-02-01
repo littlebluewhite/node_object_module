@@ -46,6 +46,7 @@ class ObjectUpdate(ObjectBasic):
     object_id: str | None = None
     name: str | None = None
     tags: list[str] | None = None
+    node_id: int | str | None = None
     object_base_id: int | None = None
 
 

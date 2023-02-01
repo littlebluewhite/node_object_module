@@ -1,3 +1,4 @@
+import pydantic.error_wrappers
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
@@ -121,31 +122,47 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
                 chg_original_list = self.chg_operate.read_data_from_redis_by_key_set({i.id for i in update_list})
+                chi_id_dict = {item["id"]: item for group in chg_original_list for item in
+                               group["control_href_items"]}
                 chg = create_update_dict(create=False)
-                chi = create_update_dict()
+                chi = create_update_dict(delete=True)
                 chi_id_set = set()
                 for data in update_list:
                     chg["update_list"].append(self.chg_operate.multiple_update_schemas(**data.dict()))
                     for i in data.control_href_items:
                         if i.id is None:
-                            chi_create_data = self.chi_operate.create_schemas(
-                                **i.dict(), control_href_group_id=data.id)
-                            if chi_create_data.tags is None:
-                                chi_create_data.tags = []
-                            chi["create_list"].append(chi_create_data)
+                            try:
+                                chi_create_data = self.chi_operate.create_schemas(
+                                    **i.dict(), control_href_group_id=data.id)
+                                if chi_create_data.tags is None:
+                                    chi_create_data.tags = []
+                                chi["create_list"].append(chi_create_data)
+                            except pydantic.error_wrappers.ValidationError as e:
+                                raise self.exc(status_code=422, detail=e)
+                        elif i.id < 0:
+                            # delete
+                            chi["delete_id_set"].add(abs(i.id))
+                            _data = chi_id_dict.get(abs(i.id), None)
+                            if _data is not None:
+                                chi["delete_data_list"].append(_data)
+                            else:
+                                raise self.exc(status_code=433, detail=f"can't find control_href_item id: {-i.id}")
                         else:
                             chi_id_set.add(i.id)
                             chi["update_list"].append(self.chi_operate.multiple_update_schemas(**i.dict()))
                 chi["sql_list"].extend(self.chi_operate.create_sql(db, chi["create_list"]))
                 chi["sql_list"].extend(self.chi_operate.update_sql(db, chi["update_list"]))
+                self.chi_operate.delete_sql(db, chi["delete_id_set"], False)
                 chg["sql_list"].extend(self.chg_operate.update_sql(db, chg["update_list"]))
-                # redis delete index tabl
+                # redis delete index table
                 chi_original_list = self.chi_operate.read_data_from_redis_by_key_set(chi_id_set)
                 self.chi_operate.delete_redis_index_table(chi_original_list, chi["update_list"])
                 self.chg_operate.delete_redis_index_table(chg_original_list, chg["update_list"])
                 # reload redis table
                 self.chg_operate.update_redis_table(chg["sql_list"])
                 self.chi_operate.update_redis_table(chi["sql_list"])
+                # delete redis table
+                self.chi_operate.delete_redis_table(chi["delete_data_list"])
                 return jsonable_encoder(chg["sql_list"])
 
         @router.delete("/{chg_id}")

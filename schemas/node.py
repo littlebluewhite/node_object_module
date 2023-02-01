@@ -58,6 +58,7 @@ class NodeCreate(NodeBasic):
 
 
 class NodeUpdate(NodeBasic):
+    parent_node_id: int | str | None = None
     node_base_id: int | None = None
     tags: list[str] | None = None
 

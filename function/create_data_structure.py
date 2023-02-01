@@ -1,4 +1,4 @@
-def create_update_dict(create: bool = True, update: bool = True, sql: bool = True, temp: bool = False) -> dict:
+def create_update_dict(create: bool = True, update: bool = True, delete: bool = False, sql: bool = True, temp: bool = False) -> dict:
     result = dict()
     if create:
         result["create_list"] = []
@@ -6,6 +6,9 @@ def create_update_dict(create: bool = True, update: bool = True, sql: bool = Tru
         result["update_list"] = []
     if sql:
         result["sql_list"] = []
+    if delete:
+        result["delete_id_set"] = set()
+        result["delete_data_list"] = []
     if temp:
         result["temp_list"] = []
     return result

@@ -60,6 +60,7 @@ class APINodeBaseUpdate(schemas.node_base.NodeBaseUpdate):
 class APINodeUpdate(NodeBasic):
     node_id: str | None = None
     tags: list[str] | None = None
+    parent_node_id: int | str | None = None
     node_base: APINodeBaseUpdate = APINodeBaseUpdate()
     third_dimension_instance: schemas.third_dimension_instance.ThirdDimensionInstanceBasic | None = None
 

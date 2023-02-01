@@ -118,9 +118,9 @@ class GeneralOperate(RedisOperate, SQLOperate):
         return sql_data_list
 
     def delete_data(self, db: Session, id_set: set[int]) -> str:
-        sql_data_list = self.delete_sql(db, id_set)
-        self.delete_redis_table(sql_data_list)
-        self.reload_redis_table(db, self.reload_related_redis_tables, sql_data_list)
+        data_list = self.delete_sql(db, id_set)
+        self.delete_redis_table(data_list)
+        self.reload_redis_table(db, self.reload_related_redis_tables, data_list)
         return "Ok"
 
     def delete_redis_table(self, sql_data_list):
@@ -142,10 +142,13 @@ class GeneralOperate(RedisOperate, SQLOperate):
         return SQLOperate.update_multiple_sql_data(self, db, update_list, self.sql_model)
 
     def delete_sql(self, db, id_set: set, return_sql: bool = True) -> list:
-        sql_data_list = SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model, return_sql)
+        data_list = []
+        if return_sql:
+            data_list = RedisOperate.read_redis_data(self, self.redis_tables[0]["name"], id_set)
+        SQLOperate.delete_multiple_sql_data(self, db, id_set, self.sql_model)
         c = self.read_table_count()
         self.write_to_redis("count", self.module.name, c-len(id_set))
-        return sql_data_list
+        return data_list
 
     def update_redis_table(self, sql_data_list: list):
         for table in self.redis_tables:
