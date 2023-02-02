@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class ControlHrefItemBasic(BaseModel):
-    name: str
-    control_data: str
+    name: str | None = None
+    control_data: str | None = None
     color: str | None = None
     control_href_group_id: int | None = None
     tags: list[str] = list()
@@ -27,8 +27,6 @@ class ControlHrefItemCreate(ControlHrefItemBasic):
 
 
 class ControlHrefItemUpdate(ControlHrefItemBasic):
-    name: str | None = None
-    control_data: str | None = None
     tags: list[str] | None = None
 
 

@@ -13,6 +13,7 @@ httptools==0.5.0
 idna==3.4
 influxdb-client==1.35.0
 packaging==23.0
+pip==23.0
 pycparser==2.21
 pydantic==1.10.4
 PyMySQL==1.0.2

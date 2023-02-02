@@ -5,8 +5,8 @@ from schemas.control_href_group import ControlHrefGroupBasic
 
 
 class APIControlHrefItemBasic(BaseModel):
-    name: str
-    control_data: str
+    name: str | None = None
+    control_data: str | None = None
     color: str | None = None
     tags: list[str] = list()
 
