@@ -4,10 +4,10 @@ from pydantic import BaseModel
 
 
 class DeviceInfoBasic(BaseModel):
-    company: str
-    contact_name: str
-    phone_number: str
-    email: str
+    company: str | None = None
+    contact_name: str | None = None
+    phone_number: str | None = None
+    email: str | None = None
     extra_info: str | None = None
     last_maintain_date: datetime.datetime | None = None
     next_maintain_date: datetime.datetime | None = None
