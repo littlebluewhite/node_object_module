@@ -48,6 +48,7 @@ class ObjectUpdate(ObjectBasic):
     tags: list[str] | None = None
     node_id: int | str | None = None
     object_base_id: int | None = None
+    control_href_group_id: int | str | None = None
 
 
 class ObjectMultipleUpdate(ObjectUpdate):

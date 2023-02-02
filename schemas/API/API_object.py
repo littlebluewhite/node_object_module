@@ -44,6 +44,7 @@ class APIObjectUpdate(ObjectBasic):
     node_id: int | str | None = None
     object_base: ObjectBaseUpdate | None = None
     fake_data_config: APIFdcUpdate | None = None
+    control_href_group_id: int | str | None = None
 
 
 class APIObjectMultipleUpdate(APIObjectUpdate):
