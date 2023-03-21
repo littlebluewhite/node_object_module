@@ -128,5 +128,5 @@ async def test_exception():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host='0.0.0.0', port=9330,
-                log_level="info", limit_concurrency=400)
+    uvicorn.run(app, host='0.0.0.0', port=9330, workers=4,
+                log_level="info", limit_concurrency=1000)
