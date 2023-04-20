@@ -150,6 +150,7 @@ class Object(Base):
     id = Column(Integer, primary_key=True, index=True)
     # 這不是自身關聯，而是對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
     object_id = Column(String(256), unique=True, nullable=False)
+    source_id = Column(String(256), unique=True)
     name = Column(String(256))  # 點位(物件)名稱
     object_base_id = Column(Integer, ForeignKey("object_base.id"), unique=True)
     node_id = Column(Integer, ForeignKey("node.id"))  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"

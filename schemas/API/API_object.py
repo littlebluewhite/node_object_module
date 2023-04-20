@@ -41,6 +41,7 @@ class APIFdcUpdate(APIFdc):
 class APIObjectUpdate(ObjectBasic):
     name: str | None = None
     object_id: str | None = None
+    source_id: str | None = None
     node_id: int | str | None = None
     object_base: ObjectBaseUpdate | None = None
     fake_data_config: APIFdcUpdate | None = None
@@ -59,5 +60,6 @@ class InsertValue(BaseModel):
 class GetValue(BaseModel):
     id: int
     object_id: str
+    source_id: str
     value: str
     timestamp: int
