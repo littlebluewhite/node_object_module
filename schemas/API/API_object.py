@@ -60,6 +60,5 @@ class InsertValue(BaseModel):
 class GetValue(BaseModel):
     id: int
     object_id: str
-    source_id: str
     value: str
     timestamp: int
