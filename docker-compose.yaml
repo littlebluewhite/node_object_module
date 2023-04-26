@@ -15,6 +15,8 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
+    ports:
+      - "3306:3306"
 
   redis:
     image: redis
@@ -24,6 +26,8 @@ services:
       test: [ "CMD", "redis-cli","ping" ]
       timeout: 20s
       retries: 10
+    ports:
+      - "6379:6379"
 
   influxdb:
     image: influxdb
@@ -42,6 +46,8 @@ services:
       interval: 1m
       timeout: 10s
       retries: 5
+    ports:
+      - "8086:8086"
 
   node_object:
     build:
