@@ -15,7 +15,7 @@ class ControlHrefGroup(ControlHrefGroupBasic):
     tags: list[str]
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     control_href_items: list[schemas.control_href_item.ControlHrefItem] = list()
 

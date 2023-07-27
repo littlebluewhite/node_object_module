@@ -29,7 +29,7 @@ class Object(ObjectBasic):
     object_base_id: int | None = None
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     object_base: schemas.object_base.ObjectBase | None = None
     fake_data_config: schemas.fake_data_config.FakeDataConfig | None = None

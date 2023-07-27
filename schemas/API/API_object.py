@@ -16,7 +16,7 @@ class APIObject(ObjectBasic):
     id: int
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     object_base: ObjectBaseBasic
     fake_data_config: APIFdc | None = None

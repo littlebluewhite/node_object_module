@@ -16,7 +16,7 @@ class ObjectTemplateBasic(BaseModel):
 class ObjectTemplate(ObjectTemplateBasic):
     id: int
 
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     object_base: schemas.object_base.ObjectBase | None = None
     control_href_group_template: schemas.control_href_group_template.ControlHrefGroupTemplate | None = None

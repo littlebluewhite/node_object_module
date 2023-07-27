@@ -16,7 +16,7 @@ class NodeTemplate(NodeTemplateBasic):
     id: int
     tags: list[str]
 
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     node_base: schemas.node_base.NodeBase | None = None
     child_node_templates: list = list()

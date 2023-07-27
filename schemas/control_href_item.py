@@ -16,7 +16,7 @@ class ControlHrefItem(ControlHrefItemBasic):
     tags: list[str] | None = list()
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         orm_mode = True

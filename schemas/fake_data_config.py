@@ -17,7 +17,7 @@ class FakeDataConfig(FakeDataConfigBasic):
     fake_data_config_base: schemas.fake_data_config_base.FakeDataConfigBase | None = None
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         orm_mode = True

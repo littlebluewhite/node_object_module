@@ -13,7 +13,7 @@ class APINodeBase(schemas.node_base.NodeBaseBasic):
 
 
 class API3DI(schemas.third_dimension_instance.ThirdDimensionInstanceBasic):
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
 class APINode(NodeBasic):
@@ -21,7 +21,7 @@ class APINode(NodeBasic):
     tags: list[str]
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     child_nodes: list[int] = list()
     node_groups: list[int] = list()

@@ -21,7 +21,7 @@ class ThirdDimensionInstance(ThirdDimensionInstanceBasic):
     id: str
     node_id: int | None = None
 
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         orm_mode = True

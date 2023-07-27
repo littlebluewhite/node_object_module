@@ -18,7 +18,7 @@ class NodeGroupBasic(BaseModel):
 
 class NodeGroup(NodeGroupBasic):
     id: int
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     nodes: list[NodeNodeGroup] = list()
 

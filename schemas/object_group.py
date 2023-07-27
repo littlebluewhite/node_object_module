@@ -22,7 +22,7 @@ class ObjectGroup(ObjectGroupBasic):
 
     objects: list[ObjectObjectGroup] = list()
 
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         orm_mode = True

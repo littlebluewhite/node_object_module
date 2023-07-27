@@ -12,7 +12,7 @@ class ControlHrefGroupTemplateBasic(BaseModel):
 class ControlHrefGroupTemplate(ControlHrefGroupTemplateBasic):
     id: int
 
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     control_href_item_template: list[schemas.control_href_item_template.ControlHrefItemTemplate] = list()
 

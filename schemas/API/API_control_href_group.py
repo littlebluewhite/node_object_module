@@ -22,7 +22,7 @@ class APIControlHrefItem(APIControlHrefItemBasic):
     tags: list[str]
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
 class APIControlHrefGroupBasic(ControlHrefGroupBasic):
@@ -35,7 +35,7 @@ class APIControlHrefGroup(APIControlHrefGroupBasic):
     control_href_items: list[APIControlHrefItem] = list()
 
     create_at: datetime.datetime
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
 
 class APIControlHrefGroupCreate(APIControlHrefGroupBasic):

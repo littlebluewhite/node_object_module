@@ -75,6 +75,9 @@ Delete Data
 
    `docker run --name node_object --network="host" -p 9330:9330 node_object:latest`
 
+    有環境變數
+   `docker run --name node_object --network="host" -e db_host=192.168.1.11 -e redis_host=192.168.1.11 -e influx_host=192.168.1.11 -p 9330:9330 -d node_object:latest`
+
 ## Swagger API Document
 
 http://{host}:{port}/docs

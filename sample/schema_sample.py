@@ -13,7 +13,7 @@
 #     is_topics: bool = True
 #     description: str
 #
-#     update_at: datetime.datetime
+#     updated_at: datetime.datetime
 #
 #     class Config:
 #         orm_mode = True
@@ -35,7 +35,7 @@
 #     tags: list[str]
 #
 #     create_at: datetime.datetime
-#     update_at: datetime.datetime
+#     updated_at: datetime.datetime
 #
 #     node_base: schemas.node_base.NodeBase | None = None
 #     child_nodes: list = list()

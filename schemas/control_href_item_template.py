@@ -13,7 +13,7 @@ class ControlHrefItemTemplateBasic(BaseModel):
 class ControlHrefItemTemplate(ControlHrefItemTemplateBasic):
     id: int
 
-    update_at: datetime.datetime
+    updated_at: datetime.datetime
 
     class Config:
         orm_mode = True

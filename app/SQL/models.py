@@ -47,7 +47,7 @@ class Node(Base):
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 
     create_at = Column(DateTime, default=datetime.datetime.now)
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     node_base = relationship("NodeBase", lazy="joined", uselist=False)
     child_nodes = relationship("Node",
@@ -66,7 +66,7 @@ class NodeTemplate(Base):
     parent_node_id = Column(Integer, ForeignKey("node.id"))
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     node_base = relationship("NodeBase", lazy="joined", uselist=False)
     child_node_templates = relationship("Node",
@@ -84,7 +84,7 @@ class NodeGroup(Base):
     is_topics = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     nodes = relationship("NodeNodeGroup", lazy="joined")
 
@@ -108,7 +108,7 @@ class ThirdDimensionInstance(Base):
 
     node_id = Column(Integer, ForeignKey("node.id"), unique=True)
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
 
 # 節點資訊
@@ -158,7 +158,7 @@ class Object(Base):
     control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"))
 
     create_at = Column(DateTime, default=datetime.datetime.now)
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     object_base = relationship("ObjectBase", lazy="immediate", uselist=False)
     object_groups = relationship("ObjectObjectGroup", lazy="joined")
@@ -174,7 +174,7 @@ class ObjectTemplate(Base):
     # 點位(物件)所屬的假資料設定Id
     node_template_id = Column(Integer, ForeignKey("node_template.id"), unique=True)  # 點位(物件)所屬的節點，是個列表，"僅含一個節點"
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     object_base = relationship("ObjectBase", lazy="joined", uselist=False)
     # 點位(物件)控制選像
@@ -191,7 +191,7 @@ class ObjectGroup(Base):
     is_topic = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))  # 點位(物件)群組文字描述
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     objects = relationship("ObjectObjectGroup", lazy="joined")
 
@@ -205,7 +205,7 @@ class ControlHrefGroup(Base):
     tags = Column(JSON)  # 節點標籤
 
     create_at = Column(DateTime, default=datetime.datetime.now)
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     control_href_items = relationship("ControlHrefItem", lazy="immediate")  # 控制選項
 
@@ -218,7 +218,7 @@ class ControlHrefGroupTemplate(Base):
 
     object_template_id = Column(Integer, ForeignKey("object_template.id"), unique=True)
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     control_href_item_templates = relationship("ControlHrefItemTemplate",
                                                lazy="immediate")  # 控制選項
@@ -236,7 +236,7 @@ class ControlHrefItem(Base):
     tags = Column(JSON)  # 節點標籤
 
     create_at = Column(DateTime, default=datetime.datetime.now)
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
 
 class ControlHrefItemTemplate(Base):
@@ -248,7 +248,7 @@ class ControlHrefItemTemplate(Base):
     color = Column(String(256))  # 選項自帶的色票
     control_href_group_template_id = Column(Integer, ForeignKey("control_href_group_template.id"))  # 控制選項
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
 
 # 假資料設定檔
@@ -272,7 +272,7 @@ class FakeDataConfig(Base):
     object_id = Column(Integer, ForeignKey("object.id"), unique=True)
 
     create_at = Column(DateTime, default=datetime.datetime.now)
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
 
@@ -285,7 +285,7 @@ class FakeDataConfigTemplate(Base):
     fake_data_config_base_id = Column(Integer, ForeignKey("fake_data_config_base.id"), unique=True)
     object_template_id = Column(Integer, ForeignKey("object_template.id"), unique=True)
 
-    update_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)
 
