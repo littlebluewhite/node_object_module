@@ -20,7 +20,7 @@ class APINode(NodeBasic):
     id: int
     tags: list[str]
 
-    create_at: datetime.datetime
+    created_at: datetime.datetime
     updated_at: datetime.datetime
 
     child_nodes: list[int] = list()

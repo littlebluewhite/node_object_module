@@ -28,7 +28,7 @@ class Object(ObjectBasic):
 
     object_base_id: int | None = None
 
-    create_at: datetime.datetime
+    created_at: datetime.datetime
     updated_at: datetime.datetime
 
     object_base: schemas.object_base.ObjectBase | None = None

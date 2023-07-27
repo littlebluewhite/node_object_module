@@ -46,7 +46,7 @@ class Node(Base):
     parent_node_id = Column(Integer, ForeignKey("node.id"))
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 
-    create_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     node_base = relationship("NodeBase", lazy="joined", uselist=False)
@@ -157,7 +157,7 @@ class Object(Base):
     tags = Column(JSON, default=list())
     control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"))
 
-    create_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     object_base = relationship("ObjectBase", lazy="immediate", uselist=False)
@@ -204,7 +204,7 @@ class ControlHrefGroup(Base):
     name = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
     tags = Column(JSON)  # 節點標籤
 
-    create_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     control_href_items = relationship("ControlHrefItem", lazy="immediate")  # 控制選項
@@ -235,7 +235,7 @@ class ControlHrefItem(Base):
     control_href_group_id = Column(Integer, ForeignKey("control_href_group.id"))  # 控制選項
     tags = Column(JSON)  # 節點標籤
 
-    create_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
 
@@ -271,7 +271,7 @@ class FakeDataConfig(Base):
     fake_data_config_base_id = Column(Integer, ForeignKey("fake_data_config_base.id"), unique=True)
     object_id = Column(Integer, ForeignKey("object.id"), unique=True)
 
-    create_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # 最後更新時間
 
     fake_data_config_base = relationship("FakeDataConfigBase", lazy="immediate", uselist=False)

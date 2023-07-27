@@ -16,7 +16,7 @@ class FakeDataConfig(FakeDataConfigBasic):
     object_id: int | None = None
     fake_data_config_base: schemas.fake_data_config_base.FakeDataConfigBase | None = None
 
-    create_at: datetime.datetime
+    created_at: datetime.datetime
     updated_at: datetime.datetime
 
     class Config:

@@ -38,7 +38,7 @@ class Node(NodeBasic):
     id: int
     tags: list[str]
 
-    create_at: datetime.datetime
+    created_at: datetime.datetime
     updated_at: datetime.datetime
 
     node_base_id: int | None = None
