@@ -7,11 +7,11 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
 from function.API.API_object import APIObjectOperate
-from dependencies.get_query_dependencies import CommonQuery
+from general_operator.dependencies.get_query_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
 from function.API.API_object import APIObjectFunction
-from function.General_operate import GeneralOperate
-from app.influxdb.influxdb import InfluxDB
+from general_operator.function.General_operate import GeneralOperate
+from general_operator.app.influxdb.influxdb import InfluxDB
 import data.API.API_object as ObjectSchemas
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from function.API.API_object import APIObjectOperate
-from function.General_operate import GeneralOperate
+from general_operator.function.General_operate import GeneralOperate
 import data.node
 import data.node_base
 import data.third_dimension_instance
@@ -10,7 +10,7 @@ import data.node_node_group
 import data.object
 import data.API.API_object
 import data.node_group
-from function.create_data_structure import create_delete_dict, create_update_dict
+from general_operator.function.create_data_structure import create_delete_dict, create_update_dict
 from schemas.API.API_node import APINodeMultipleUpdate
 from schemas.API.API_object import APIObjectMultipleUpdate
 

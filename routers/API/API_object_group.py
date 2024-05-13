@@ -3,12 +3,12 @@ from sqlalchemy.orm import sessionmaker, Session
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Depends, Query
 
-from app.influxdb.influxdb import InfluxDB
+from general_operator.app.influxdb.influxdb import InfluxDB
 from function.API.API_object_group import APIObjectGroupOperate
 from dependencies.db_dependencies import create_get_db
 import data.API.API_object_group as ObjectGroupSchemas
 from fastapi.encoders import jsonable_encoder
-from function.create_data_structure import create_update_dict
+from general_operator.function.create_data_structure import create_update_dict
 
 
 class APIObjectGroupRouter(APIObjectGroupOperate):

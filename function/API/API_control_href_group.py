@@ -1,7 +1,7 @@
 import data.control_href_group
 import data.control_href_item
-from app.influxdb.influxdb import InfluxDB
-from function.General_operate import GeneralOperate
+from general_operator.app.influxdb.influxdb import InfluxDB
+from general_operator.function.General_operate import GeneralOperate
 
 
 class APIChgFunction:

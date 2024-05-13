@@ -2,3 +2,6 @@
 /deploy/redis/
 /deploy/sql_mount/
 /.idea
+/build/
+/dist/
+/general_operator.egg-info/

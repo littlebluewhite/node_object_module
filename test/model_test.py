@@ -1,7 +1,7 @@
 from sqlalchemy import update
 
 from app.SQL import models
-from app.SQL import SQLDB
+from general_operator.app.SQL import SQLDB
 
 if __name__ == "__main__":
     db_config = {

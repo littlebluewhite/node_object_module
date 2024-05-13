@@ -3,10 +3,10 @@ from fastapi import Depends, APIRouter
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi.responses import JSONResponse
 
-from app.influxdb.influxdb import InfluxDB
-from dependencies.get_query_dependencies import CommonQuery
-from dependencies.db_dependencies import create_get_db
-from function.General_operate import GeneralOperate
+from ..app.influxdb.influxdb import InfluxDB
+from ..dependencies.get_query_dependencies import CommonQuery
+from ..dependencies.db_dependencies import create_get_db
+from ..function.General_operate import GeneralOperate
 
 
 class GeneralRouter(GeneralOperate):

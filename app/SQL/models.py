@@ -3,7 +3,7 @@ import datetime
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, DateTime, Float, UniqueConstraint
 from sqlalchemy.orm import relationship
 
-from app.SQL.database import Base
+from general_operator.app.SQL.database import Base
 
 
 class NodeNodeGroup(Base):

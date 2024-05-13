@@ -23,16 +23,16 @@ import data.object_base
 import data.object_group
 import data.object_template
 import data.third_dimension_instance
-from app.SQL.database import SQLDB
+from general_operator.app.SQL.database import SQLDB
 from app.SQL import models
 from function.config_manager import ConfigManager
-from function.exception import GeneralOperatorException
-from app.influxdb.influxdb import InfluxDB
-from app.redis_db.redis import RedisDB
+from general_operator.function.exception import GeneralOperatorException
+from general_operator.app.influxdb.influxdb import InfluxDB
+from general_operator.app.redis_db.redis import RedisDB
 from routers.API.API_control_href_group import APIControlHrefGroup
 from routers.API.API_node import APINodeRouter
 from routers.API.API_object import APIObjectRouter
-from routers.General_table_router import GeneralRouter
+from general_operator.routers.General_table_router import GeneralRouter
 
 app = FastAPI(title="node_object_app")
 

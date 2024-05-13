@@ -4,11 +4,11 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.influxdb.influxdb import InfluxDB
-from dependencies.get_query_dependencies import CommonQuery, SimpleQuery
+from general_operator.app.influxdb.influxdb import InfluxDB
+from general_operator.dependencies.get_query_dependencies import CommonQuery, SimpleQuery
 from dependencies.db_dependencies import create_get_db
 from function.API.API_control_href_group import APIControlHrefGroupOperate
-from function.create_data_structure import create_update_dict, create_delete_dict
+from general_operator.function.create_data_structure import create_update_dict, create_delete_dict
 
 
 class APIControlHrefGroup(APIControlHrefGroupOperate):

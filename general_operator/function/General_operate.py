@@ -6,10 +6,10 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import text
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.SQL.sql_operate import SQLOperate
-from app.influxdb.influxdb import InfluxDB
-from app.influxdb.influxdb_operate import InfluxOperate
-from app.redis_db.redis_operate import RedisOperate
+from ..app.SQL.sql_operate import SQLOperate
+from ..app.influxdb.influxdb import InfluxDB
+from ..app.influxdb.influxdb_operate import InfluxOperate
+from ..app.redis_db.redis_operate import RedisOperate
 
 
 class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):

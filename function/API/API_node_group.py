@@ -1,5 +1,5 @@
-from app.influxdb.influxdb import InfluxDB
-from function.General_operate import GeneralOperate
+from general_operator.app.influxdb.influxdb import InfluxDB
+from general_operator.function.General_operate import GeneralOperate
 import data.node
 import data.node_group
 import data.node_node_group

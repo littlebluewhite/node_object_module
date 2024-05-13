@@ -7,8 +7,8 @@ import data.object_base
 import data.object_object_group
 import data.fake_data_config
 import data.fake_data_config_base
-from function.General_operate import GeneralOperate
-from function.create_data_structure import create_update_dict, create_delete_dict
+from general_operator.function.General_operate import GeneralOperate
+from general_operator.function.create_data_structure import create_update_dict, create_delete_dict
 from schemas.API.API_object import APIObjectMultipleUpdate
 
 
