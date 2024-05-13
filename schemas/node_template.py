@@ -7,7 +7,7 @@ import schemas.object_template
 
 
 class NodeTemplateBasic(BaseModel):
-    node_template_id: str
+    uid: str
     parent_node_template_id: int | None = None
     node_base_id: int | None = None
 
@@ -31,7 +31,7 @@ class NodeTemplateCreate(NodeTemplateBasic):
 
 
 class NodeTemplateUpdate(NodeTemplateBasic):
-    node_template_id: str | None = None
+    uid: str | None = None
 
 
 class NodeTemplateMultipleUpdate(NodeTemplateUpdate):

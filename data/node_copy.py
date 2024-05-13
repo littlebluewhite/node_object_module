@@ -4,7 +4,7 @@ from app.SQL import models
 name = "node"
 redis_tables = [
     {"name": name, "key": "id"},
-    {"name": "node_by_node_id", "key": "node_id"},
+    {"name": "node_by_uid", "key": "uid"},
 ]
 sql_model = models.Node
 main_schemas = schemas.node.Node

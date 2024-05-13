@@ -24,8 +24,9 @@ class NodeBaseCreate(NodeBaseBasic):
 
 
 class NodeBaseUpdate(NodeBaseBasic):
-    name: str | None = None
+    # uid: str | None = None
     node_type: str | None = None
+    name: str | None = None # Make it optional in APINodeUpdate
 
 
 class NodeBaseMultipleUpdate(NodeBaseUpdate):

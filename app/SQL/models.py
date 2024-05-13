@@ -40,7 +40,7 @@ class Node(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
-    node_id = Column(String(256), unique=True, default=None)
+    uid = Column(String(256), unique=True, default=None)
     principal_name = Column(String(256))  # 節點負責人
     tags = Column(JSON)  # 節點標籤
     parent_node_id = Column(Integer, ForeignKey("node.id"))
@@ -62,7 +62,7 @@ class NodeTemplate(Base):
     __tablename__ = "node_template"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    node_template_id = Column(String(256))  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
+    uid = Column(String(256))  # 設備(節點)對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
     parent_node_id = Column(Integer, ForeignKey("node.id"))
     node_base_id = Column(Integer, ForeignKey("node_base.id"), unique=True)
 
@@ -80,7 +80,7 @@ class NodeGroup(Base):
     __tablename__ = "node_group"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(256), nullable=False, unique=True)  # 節點群組名稱
+    uid = Column(String(256), nullable=False, unique=True)  # 節點群組名稱
     is_topics = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))
 
@@ -149,7 +149,7 @@ class Object(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     # 這不是自身關聯，而是對應真實的物件id，可能是來自於廠商整合的hub、SCADA、不同protocol的uuid
-    object_id = Column(String(256), unique=True, nullable=False)
+    uid = Column(String(256), unique=True, nullable=False)
     source_id = Column(String(256), unique=True)
     name = Column(String(256))  # 點位(物件)名稱
     object_base_id = Column(Integer, ForeignKey("object_base.id"), unique=True)
@@ -187,7 +187,7 @@ class ObjectGroup(Base):
     __tablename__ = "object_group"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256), nullable=False, unique=True)  # 節點資訊名稱
+    uid = Column(String(256), nullable=False, unique=True)  # 節點資訊名稱
     is_topic = Column(Boolean, default=True, nullable=False)  # 是否為主題
     description = Column(String(256))  # 點位(物件)群組文字描述
 
@@ -201,7 +201,7 @@ class ControlHrefGroup(Base):
     __tablename__ = "control_href_group"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
+    uid = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
     tags = Column(JSON)  # 節點標籤
 
     created_at = Column(DateTime, default=datetime.datetime.now)
@@ -214,7 +214,7 @@ class ControlHrefGroupTemplate(Base):
     __tablename__ = "control_href_group_template"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
+    uid = Column(String(256), nullable=False, unique=True)  # 控制選項列表名稱
 
     object_template_id = Column(Integer, ForeignKey("object_template.id"), unique=True)
 

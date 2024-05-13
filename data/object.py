@@ -5,7 +5,7 @@ from app.SQL import models
 name = "object"
 redis_tables = [
     {"name": name, "key": "id"},
-    {"name": "object_by_object_id", "key": "object_id"},
+    {"name": "object_by_uid", "key": "uid"},
 ]
 sql_model = models.Object
 main_schemas = schemas.object.Object

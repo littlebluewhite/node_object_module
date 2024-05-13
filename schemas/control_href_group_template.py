@@ -5,7 +5,7 @@ import schemas.control_href_item_template
 
 
 class ControlHrefGroupTemplateBasic(BaseModel):
-    name: str
+    uid: str
     object_template_id: int | None = None
 
 
@@ -25,7 +25,7 @@ class ControlHrefGroupTemplateCreate(ControlHrefGroupTemplateBasic):
 
 
 class ControlHrefGroupTemplateUpdate(ControlHrefGroupTemplateBasic):
-    name: str | None = None
+    uid: str | None = None
 
 
 class ControlHrefGroupTemplateMultipleUpdate(ControlHrefGroupTemplateUpdate):

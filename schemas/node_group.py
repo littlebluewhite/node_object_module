@@ -11,7 +11,7 @@ class NodeNodeGroup(BaseModel):
 
 
 class NodeGroupBasic(BaseModel):
-    name: str
+    uid: str
     is_topics: bool = True
     description: str | None = None
 
@@ -31,9 +31,10 @@ class NodeGroupCreate(NodeGroupBasic):
 
 
 class NodeGroupUpdate(NodeGroupBasic):
-    name: str | None = None
-    is_topics: bool | None = None
-    description: str | None = None
+    pass
+    # name: str | None = None
+    # is_topics: bool | None = None
+    # description: str | None = None
 
 
 class NodeGroupMultipleUpdate(NodeGroupBasic):

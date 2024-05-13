@@ -43,6 +43,7 @@ class APINodeBaseCreate(schemas.node_base.NodeBaseCreate):
 
 class APINodeCreate(NodeBasic):
     node_base: APINodeBaseCreate
+    node_groups: list[int] = list() # Make it Optional in API_create
     third_dimension_instance: schemas.third_dimension_instance.ThirdDimensionInstanceBasic | None = None
 
 
@@ -58,10 +59,11 @@ class APINodeBaseUpdate(schemas.node_base.NodeBaseUpdate):
 
 
 class APINodeUpdate(NodeBasic):
-    node_id: str | None = None
+    # node_uid: str | None = None
     tags: list[str] | None = None
-    parent_node_id: int | str | None = None
-    node_base: APINodeBaseUpdate = APINodeBaseUpdate()
+    # parent_node_id: int | str | None = None
+    node_groups: list[int] = []
+    node_base: APINodeBaseUpdate | None = None
     third_dimension_instance: schemas.third_dimension_instance.ThirdDimensionInstanceBasic | None = None
 
 

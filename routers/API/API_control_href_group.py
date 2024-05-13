@@ -1,8 +1,10 @@
 import pydantic.error_wrappers
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import sessionmaker, Session
 
+from app.influxdb.influxdb import InfluxDB
 from dependencies.get_query_dependencies import CommonQuery, SimpleQuery
 from dependencies.db_dependencies import create_get_db
 from function.API.API_control_href_group import APIControlHrefGroupOperate
@@ -10,10 +12,10 @@ from function.create_data_structure import create_update_dict, create_delete_dic
 
 
 class APIControlHrefGroup(APIControlHrefGroupOperate):
-    def __init__(self, module, redis_db, exc, db_session: sessionmaker):
+    def __init__(self, module, redis_db, influxdb: InfluxDB, exc, db_session: sessionmaker):
         self.db_session = db_session
         self.simple_schemas = module.simple_schemas
-        APIControlHrefGroupOperate.__init__(self, module, redis_db, exc)
+        APIControlHrefGroupOperate.__init__(self, module, redis_db, influxdb, exc)
 
     def create(self):
         router = APIRouter(
@@ -33,13 +35,13 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 chg = self.chg_operate.read_all_data_from_redis()[common.skip:][:common.limit]
             else:
                 id_set = self.chg_operate.execute_sql_where_command(db, common.where_command)
-                chg = self.chg_operate.read_data_from_redis_by_key_set(id_set)[common.skip:][:common.limit]
-            return chg
+                chg = self.chg_operate.read_from_redis_by_key_set(id_set)[common.skip:][:common.limit]
+            return JSONResponse(content=chg)
 
         @router.get("/simple/", response_model=list[self.simple_schemas])
         async def get_simple_objects(common: SimpleQuery = Depends()):
             chgs = self.chg_operate.read_all_data_from_redis()[common.skip:][:common.limit]
-            return [self.format_simple_api_chg(chg) for chg in chgs]
+            return JSONResponse(content=[self.format_simple_api_chg(chg) for chg in chgs])
 
         @router.post("/", response_model=self.main_schemas)
         async def create_api_control_href_group(create_data: create_schemas,
@@ -58,7 +60,7 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 self.chg_operate.update_redis_table([chg])
                 self.chi_operate.update_redis_table(chi_list)
 
-                return jsonable_encoder(chg)
+                return JSONResponse(content=jsonable_encoder(chg))
 
         @router.post("/multiple/", response_model=list[self.main_schemas])
         async def create_api_control_href_groups(create_data_list: list[create_schemas],
@@ -85,7 +87,7 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 self.chg_operate.update_redis_table(chg_list)
                 self.chi_operate.update_redis_table(chi_list)
 
-                return jsonable_encoder(chg_list)
+                return JSONResponse(content=jsonable_encoder(chg_list))
 
         @router.patch("/{chg_id}", response_model=self.main_schemas)
         async def update_api_control_href_group(update_data: update_schemas, chg_id: int,
@@ -93,7 +95,7 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
             with db.begin():
                 update_dict = update_data.dict()
                 chg = create_update_dict(create=False)
-                chg_original_list = self.chg_operate.read_data_from_redis_by_key_set({chg_id})
+                chg_original_list = self.chg_operate.read_from_redis_by_key_set({chg_id})
                 chi_id_set = set()
                 chg["update_list"].append(self.chg_operate.multiple_update_schemas(**update_dict, id=chg_id))
                 chi = create_update_dict()
@@ -108,20 +110,20 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 chg["sql_list"].extend(self.chg_operate.update_sql(db, chg["update_list"]))
                 # redis operate
                 # redis delete index table
-                chi_original_list = self.chi_operate.read_data_from_redis_by_key_set(chi_id_set)
+                chi_original_list = self.chi_operate.read_from_redis_by_key_set(chi_id_set)
                 self.chi_operate.delete_redis_index_table(chi_original_list, chi["update_list"])
                 self.chg_operate.delete_redis_index_table(chg_original_list, chg["update_list"])
                 # reload redis table
                 self.chg_operate.update_redis_table(chg["sql_list"])
                 self.chi_operate.update_redis_table(chi["sql_list"])
-                return jsonable_encoder(chg["sql_list"][0])
+                return JSONResponse(content=jsonable_encoder(chg["sql_list"][0]))
 
         @router.patch("/multiple/", response_model=list[self.main_schemas])
         async def update_api_control_href_groups(
                 update_list: list[multiple_update_schemas],
                 db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
-                chg_original_list = self.chg_operate.read_data_from_redis_by_key_set({i.id for i in update_list})
+                chg_original_list = self.chg_operate.read_from_redis_by_key_set({i.id for i in update_list})
                 chi_id_dict = {item["id"]: item for group in chg_original_list for item in
                                group["control_href_items"]}
                 chg = create_update_dict(create=False)
@@ -155,7 +157,7 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 self.chi_operate.delete_sql(db, chi["delete_id_set"], False)
                 chg["sql_list"].extend(self.chg_operate.update_sql(db, chg["update_list"]))
                 # redis delete index table
-                chi_original_list = self.chi_operate.read_data_from_redis_by_key_set(chi_id_set)
+                chi_original_list = self.chi_operate.read_from_redis_by_key_set(chi_id_set)
                 self.chi_operate.delete_redis_index_table(chi_original_list, chi["update_list"])
                 self.chg_operate.delete_redis_index_table(chg_original_list, chg["update_list"])
                 # reload redis table
@@ -163,12 +165,12 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 self.chi_operate.update_redis_table(chi["sql_list"])
                 # delete redis table
                 self.chi_operate.delete_redis_table(chi["delete_data_list"])
-                return jsonable_encoder(chg["sql_list"])
+                return JSONResponse(content=jsonable_encoder(chg["sql_list"]))
 
         @router.delete("/{chg_id}")
         async def delete_api_control_href_group(chg_id: int, db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
-                chg_original_list = self.chg_operate.read_data_from_redis_by_key_set({chg_id})
+                chg_original_list = self.chg_operate.read_from_redis_by_key_set({chg_id})
                 chg = create_delete_dict()
                 chi = create_delete_dict()
                 for g in chg_original_list:
@@ -183,14 +185,14 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 # delete redis table
                 self.chg_operate.delete_redis_table(chg["data_list"])
                 self.chi_operate.delete_redis_table(chi["data_list"])
-                return "ok"
+                return JSONResponse(content="ok")
 
         @router.delete("/multiple/")
         async def delete_api_control_href_group(
-                id_set: set[int],
+                id_set: set[int] = Query(...),
                 db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
-                chg_original_list = self.chg_operate.read_data_from_redis_by_key_set(id_set)
+                chg_original_list = self.chg_operate.read_from_redis_by_key_set(id_set)
                 chg = create_delete_dict()
                 chi = create_delete_dict()
                 for g in chg_original_list:
@@ -205,6 +207,6 @@ class APIControlHrefGroup(APIControlHrefGroupOperate):
                 # delete redis table
                 self.chg_operate.delete_redis_table(chg["data_list"])
                 self.chi_operate.delete_redis_table(chi["data_list"])
-                return "ok"
+                return JSONResponse(content="ok")
 
         return router

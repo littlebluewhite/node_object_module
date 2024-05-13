@@ -14,7 +14,6 @@ class APIControlHrefItemBasic(BaseModel):
 class APIControlHrefGroupSimple(BaseModel):
     id: int
     uid: str | None
-    name: str | None
 
 
 class APIControlHrefItem(APIControlHrefItemBasic):
@@ -50,7 +49,7 @@ class APIControlHrefItemUpdate(APIControlHrefItemBasic):
 
 
 class APIControlHrefGroupUpdate(APIControlHrefGroupBasic):
-    name: str | None = None
+    uid: str | None = None
     tags: list[str] | None = None
     control_href_items: list[APIControlHrefItemUpdate] | None = list()
 

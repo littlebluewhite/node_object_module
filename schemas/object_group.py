@@ -11,7 +11,7 @@ class ObjectObjectGroup(BaseModel):
 
 
 class ObjectGroupBasic(BaseModel):
-    name: str
+    uid: str
     is_topic: bool = True
     description: str | None = None
 
@@ -33,7 +33,7 @@ class ObjectGroupCreate(ObjectGroupBasic):
 
 
 class ObjectGroupUpdate(ObjectGroupBasic):
-    name: str | None = None
+    uid: str | None = None
     is_topic: bool | None = None
 
 

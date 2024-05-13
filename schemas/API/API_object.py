@@ -32,6 +32,7 @@ class APIObjectSimple(BaseModel):
 class APIObjectCreate(ObjectBasic):
     object_base: ObjectBaseBasic
     fake_data_config: APIFdc | None = None
+    object_groups: list = list()
 
 
 class APIFdcUpdate(APIFdc):
@@ -40,12 +41,13 @@ class APIFdcUpdate(APIFdc):
 
 class APIObjectUpdate(ObjectBasic):
     name: str | None = None
-    object_id: str | None = None
+    uid: str | None = None
     source_id: str | None = None
     node_id: int | str | None = None
     object_base: ObjectBaseUpdate | None = None
     fake_data_config: APIFdcUpdate | None = None
     control_href_group_id: int | str | None = None
+    object_groups: list = list()
 
 
 class APIObjectMultipleUpdate(APIObjectUpdate):
@@ -55,10 +57,15 @@ class APIObjectMultipleUpdate(APIObjectUpdate):
 class InsertValue(BaseModel):
     id: int
     value: str
-
+    timestamp: float = None
 
 class GetValue(BaseModel):
     id: int
-    object_id: str
+    uid: str
     value: str
-    timestamp: int
+    timestamp: float
+
+class InsertValueModify(BaseModel):
+    uid: str
+    value: str
+    timestamp: float = None

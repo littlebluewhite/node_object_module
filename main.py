@@ -26,11 +26,10 @@ import data.third_dimension_instance
 from app.SQL.database import SQLDB
 from app.value_trace import ValueQueue
 from app.SQL import models
-from data.merge_config.data import parser_arguments, check_list
-from function.exception import NodeObjectException
-from function.config import MergeConfig
+from function.config_manager import ConfigManager
+from function.exception import GeneralOperatorException
 from app.influxdb.influxdb import InfluxDB
-from app.redis_db.redis import NodeRedis
+from app.redis_db.redis import RedisDB
 from routers.API.API_control_href_group import APIControlHrefGroup
 from routers.API.API_node import APINodeRouter
 from routers.API.API_object import APIObjectRouter
@@ -47,75 +46,71 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# config handle
-merge_config = MergeConfig(parser_arguments, check_list)
-config = merge_config.get_config()
-
 # redis_db
-redis_db = NodeRedis(config["Redis"]).new_redis()
+redis_db = RedisDB(ConfigManager.redis.to_dict()).redis_client()
 
 # SQL DB
-db = SQLDB(config["SQLDB"])
+db = SQLDB(ConfigManager.sql.to_dict())
 #   create SQL models
 models.Base.metadata.create_all(bind=db.get_engine())
 
 # Influx DB
-influxdb = InfluxDB(config["InfluxDB"])
+influxdb = InfluxDB(ConfigManager.influxdb.to_dict())
 
 #   create SQL session
 db_session = db.new_db_session()
 q = ValueQueue()
 # router
 app.include_router(WebsocketsRouter(q).create())
-app.include_router(APINodeRouter(data.API.API_node, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(APIObjectRouter(data.API.API_object, redis_db,
-                                   influxdb, NodeObjectException,
-                                   db_session, q).create())
-app.include_router(APIControlHrefGroup(data.API.API_control_href_group, redis_db,
-                                       NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.node, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.node_base, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.device_info, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.third_dimension_instance, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.node_group, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.node_node_group, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.object, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.object_base, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.object_group, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.object_object_group, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.control_href_group, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.control_href_item, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.fake_data_config, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.fake_data_config_base, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.node_template, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.object_template, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.control_href_group_template, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.control_href_item_template, redis_db,
-                                 NodeObjectException, db_session).create())
-app.include_router(GeneralRouter(data.fake_data_config_template, redis_db,
-                                 NodeObjectException, db_session).create())
+app.include_router(APINodeRouter(data.API.API_node, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(APIObjectRouter(data.API.API_object, redis_db, influxdb,
+                                   GeneralOperatorException,
+                                   db_session).create())
+app.include_router(APIControlHrefGroup(data.API.API_control_href_group, redis_db, influxdb,
+                                       GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.node, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.node_base, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.device_info, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.third_dimension_instance, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.node_group, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.node_node_group, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.object, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.object_base, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.object_group, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.object_object_group, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.control_href_group, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.control_href_item, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.fake_data_config, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.fake_data_config_base, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.node_template, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.object_template, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.control_href_group_template, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.control_href_item_template, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
+app.include_router(GeneralRouter(data.fake_data_config_template, redis_db, influxdb,
+                                 GeneralOperatorException, db_session).create())
 
 
-@app.exception_handler(NodeObjectException)
-async def unicorn_exception_handler(request: Request, exc: NodeObjectException):
+@app.exception_handler(GeneralOperatorException)
+async def unicorn_exception_handler(request: Request, exc: GeneralOperatorException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": f"{exc.detail}"},
@@ -124,9 +119,9 @@ async def unicorn_exception_handler(request: Request, exc: NodeObjectException):
 
 @app.get("/exception")
 async def test_exception():
-    raise NodeObjectException(status_code=423, detail="test exception")
+    raise GeneralOperatorException(status_code=423, detail="test exception")
 
 
 if __name__ == "__main__":
-    uvicorn.run(app="main:app", host='0.0.0.0', port=9330, workers=4, reload=True, loop="asyncio",
+    uvicorn.run(app="main:app", host='0.0.0.0', port=ConfigManager.server.port, workers=4, reload=True, loop="asyncio",
                 log_level="info", limit_concurrency=1000)
