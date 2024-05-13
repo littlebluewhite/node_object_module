@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.value_trace import ValueQueue
 from function.API.API_object import APIObjectOperate
 from dependencies.get_query_dependencies import CommonQuery
 from dependencies.db_dependencies import create_get_db
@@ -23,7 +22,6 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
         self.redis = redis_db
         self.influxdb = influxdb
         self.simple_schemas = module.simple_schemas
-        self.value_trace = ValueQueue()
         APIObjectOperate.__init__(self, module, redis_db, influxdb, exc)
 
     def create(self):
@@ -232,18 +230,6 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
                 # 背景寫入歷史資料
                 background_tasks.add_task(self.write_to_history, data["id"], data["uid"], id_value_dict[data["id"]][0])
 
-            # read original object_value from redis
-            ori_data_list = self.read_value_from_redis(set(insert_data.keys()))
-            ori_data = {packages["id"]: packages for packages in ori_data_list}
-
-            # Only changed data to be transmitted(transmit_data)
-            transmit_data = self.value_trace.compare_and_trim(ori_data, insert_data)
-            await self.value_trace.transmit_data(transmit_data)
-            for key in transmit_data:
-                transmit_data[key] = json.dumps(transmit_data[key])
-            if transmit_data:
-                self.write_value_to_redis(transmit_data)
-
             return JSONResponse(content="ok")
 
         @router.put("/insert_value_by_uid/")
@@ -268,18 +254,6 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
                 insert_data[data["id"]] = _template
                 # 背景寫入歷史資料
                 background_tasks.add_task(self.write_to_history, _template["id"], _template["uid"], _template["value"])
-
-            # read original object_value from redis
-            ori_data_list = self.read_value_from_redis(set(insert_data.keys()))
-            ori_data = {packages["id"]: packages for packages in ori_data_list}
-
-            # Only changed data to be transmitted(transmit_data)
-            transmit_data = self.value_trace.compare_and_trim(ori_data, insert_data)
-            await self.value_trace.transmit_data(transmit_data)
-            for key in transmit_data:
-                transmit_data[key] = json.dumps(transmit_data[key])
-            if transmit_data:
-                self.write_value_to_redis(transmit_data)
 
             return JSONResponse(content="ok")
 

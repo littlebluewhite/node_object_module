@@ -24,7 +24,6 @@ import data.object_group
 import data.object_template
 import data.third_dimension_instance
 from app.SQL.database import SQLDB
-from app.value_trace import ValueQueue
 from app.SQL import models
 from function.config_manager import ConfigManager
 from function.exception import GeneralOperatorException
@@ -34,7 +33,6 @@ from routers.API.API_control_href_group import APIControlHrefGroup
 from routers.API.API_node import APINodeRouter
 from routers.API.API_object import APIObjectRouter
 from routers.General_table_router import GeneralRouter
-from routers.websockets import WebsocketsRouter
 
 app = FastAPI(title="node_object_app")
 
@@ -59,9 +57,7 @@ influxdb = InfluxDB(ConfigManager.influxdb.to_dict())
 
 #   create SQL session
 db_session = db.new_db_session()
-q = ValueQueue()
 # router
-app.include_router(WebsocketsRouter(q).create())
 app.include_router(APINodeRouter(data.API.API_node, redis_db, influxdb,
                                  GeneralOperatorException, db_session).create())
 app.include_router(APIObjectRouter(data.API.API_object, redis_db, influxdb,
