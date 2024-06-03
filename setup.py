@@ -2,16 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name='general_operator',
-    version='0.1',
+    version='0.1.3',
     packages=['general_operator', 'general_operator.app', 'general_operator.app.SQL', 'general_operator.app.influxdb',
               'general_operator.app.redis_db', 'general_operator.dependencies', 'general_operator.function', 'general_operator.routers',],
     install_requires=[
-        'fastapi==0.83.0',
-        'influxdb-client==1.42.0',
-        'pydantic==1.10.15',
-        'redis==5.0.4',
-        'SQLAlchemy==2.0.30',
-        'uvicorn==0.29.0'
+        'fastapi>=0.83.0',
+        'influxdb-client>=1.22.0',
+        'redis>=5.0.1',
+        'SQLAlchemy>=2.0.10'
     ],
     author='wilson',
     author_email='wwilson008@gmail.com',
