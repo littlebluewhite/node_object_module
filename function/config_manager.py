@@ -55,6 +55,8 @@ class ConfigManager:
                 return value.lower() in {"true", "1", "t", "y", "yes", "True", "T"}
             elif original_type is list:
                 return [v.strip() for v in value.split(',')]
+            elif original_type is type(None):
+                return value
             else:
                 return original_type(value)
         except ValueError:

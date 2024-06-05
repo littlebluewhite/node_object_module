@@ -11,6 +11,7 @@ sql:
   user: root
   password: 123456
   db: node_object
+  pool_recycle: 3600
 influxdb:
   host: 127.0.0.1
   port: 8086
@@ -23,6 +24,7 @@ testSQL:
   user: root
   password: 123456
   db: node_object_test
+  pool_recycle: 3600
 
 server:
   port: 9330

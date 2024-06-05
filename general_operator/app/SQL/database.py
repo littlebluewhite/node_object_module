@@ -10,10 +10,13 @@ class SQLDB:
         self.db = db_config["db"]
         self.user = db_config["user"]
         self.password = db_config["password"]
+        self.pool_recycle = 3600
+        if db_config["pool_recycle"] is not None:
+            self.pool_recycle = db_config["pool_recycle"]
         self.url = f"mysql+pymysql://{self.user}:{self.password}" \
                    f"@{self.host}:{self.port}/{self.db}"
         # self.url = "postgresql://postgres:123456@localhost:5432/dispatch"
-        self.engine = create_engine(self.url, echo=True, max_overflow=100)
+        self.engine = create_engine(self.url, echo=True, pool_size=10, max_overflow=20, pool_recycle=self.pool_recycle)
 
     def get_engine(self):
         return self.engine
