@@ -1,5 +1,5 @@
 import influxdb_client
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.client.write_api import SYNCHRONOUS, WriteOptions
 
 from .influxdb import InfluxDB
 
@@ -10,7 +10,16 @@ class InfluxOperate:
         self.exc = exc
         self.__bucket = influxdb.bucket
         self.__org = influxdb.org
-        self.writer = self.influxdb.client.write_api(write_options=SYNCHRONOUS)
+        self.writer = self.influxdb.client.write_api(
+            write_options=WriteOptions(
+                batch_size=1000,
+                flush_interval=10_000,
+                jitter_interval=2_000,
+                retry_interval=5_000,
+                max_retries=5,
+                max_retry_delay=30_000,
+                max_close_wait=300_000,
+                exponential_base=2))
         self.reader = self.influxdb.client.query_api()
 
     def change_bucket(self, bucket: str):
@@ -25,7 +34,7 @@ class InfluxOperate:
     def show_org(self):
         return self.__org
 
-    def write(self, p: influxdb_client.Point):
+    def write(self, p: influxdb_client.Point | list[influxdb_client.Point]):
         # ex:
         # p = influxdb_client.Point(
         #     "object_value").tag("id", str(_id)) \

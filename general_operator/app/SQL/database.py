@@ -4,14 +4,14 @@ from sqlalchemy.orm import sessionmaker
 
 
 class SQLDB:
-    def __init__(self, db_config):
+    def __init__(self, db_config:dict):
         self.host = db_config["host"]
         self.port = db_config["port"]
         self.db = db_config["db"]
         self.user = db_config["user"]
         self.password = db_config["password"]
         self.pool_recycle = 3600
-        if db_config["pool_recycle"] is not None:
+        if db_config.get("pool_recycle", None) is not None:
             self.pool_recycle = db_config["pool_recycle"]
         self.url = f"mysql+pymysql://{self.user}:{self.password}" \
                    f"@{self.host}:{self.port}/{self.db}"

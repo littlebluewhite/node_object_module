@@ -22,12 +22,32 @@ class APIObjectFunction:
         return obj
 
     @staticmethod
-    def format_simple_api_object(obj:dict) -> dict:
+    def format_simple_api_object(obj: dict) -> dict:
         return {
             "id": obj["id"],
             "uid": obj["uid"],
             "name": obj["name"],
         }
+
+    @staticmethod
+    def transfer_to_point(insert_data: dict) -> list:
+        points = []
+        for i in insert_data.values():
+            try:
+                value = float(i["value"])
+                points.append(influxdb_client.Point(
+                    "object_value").tag("id", str(i["id"]))
+                              .tag("uid", str(i["uid"]))
+                              .field("value", value)
+                              )
+            except ValueError:
+                value = str(i["value"])
+                points.append(influxdb_client.Point(
+                    "object_value").tag("id", str(i["id"]))
+                              .tag("uid", str(i["uid"]))
+                              .field("value_string", value)
+                              )
+        return points
 
 
 class APIObjectOperate(GeneralOperate):
@@ -61,7 +81,7 @@ class APIObjectOperate(GeneralOperate):
             original_object: dict = original_key_id_dict[data["id"]]
             original_o_base: dict = original_object["object_base"]
             original_fdc = original_object["fake_data_config"]
-            original_og: set ={i["object_group_id"] for i in original_object["object_groups"]}
+            original_og: set = {i["object_group_id"] for i in original_object["object_groups"]}
             # fake_data_config
             # Optional when it was created. 
             # If ori_fdc exists, add in "update_list", if it doesn't, add in "create_list" 
@@ -115,7 +135,7 @@ class APIObjectOperate(GeneralOperate):
         # redis delete index table
         self.fdcBase_operate.delete_redis_index_table(
             [i["fake_data_config"]["fake_data_config_base"] for i in original_data_list
-                if i["fake_data_config"]], fdc_base["update_list"])
+             if i["fake_data_config"]], fdc_base["update_list"])
         self.fdc_operate.delete_redis_index_table(
             [i["fake_data_config"] for i in original_data_list if i["fake_data_config"]], fdc["update_list"])
         self.object_base_operate.delete_redis_index_table(
@@ -130,11 +150,10 @@ class APIObjectOperate(GeneralOperate):
         self.object_operate.update_redis_table(o["sql_list"])
         # reload related redis table
         self.oo_group_operate.reload_redis_table(
-            db, self.oo_group_operate.reload_related_redis_tables, oog["sql_list"]+oog["delete_data_list"])
+            db, self.oo_group_operate.reload_related_redis_tables, oog["sql_list"] + oog["delete_data_list"])
         self.object_operate.reload_redis_table(db, self.object_operate.reload_related_redis_tables,
-                                                o["sql_list"], self_ref_id_dict)
+                                               o["sql_list"], self_ref_id_dict)
         return o["sql_list"]
-
 
     def delete_multiple_object(self, id_set: set[int], db: Session):
         original_data_list = self.object_operate.read_from_redis_by_key_set(id_set)
@@ -187,38 +206,32 @@ class APIObjectOperate(GeneralOperate):
     def write_value_to_redis(self, mapping: dict):
         self.write_to_redis("object_value", mapping=mapping)
 
-    def write_to_history(self, _id: str, uid: str, value: str):
-        try:
-            value2 = float(value)
-            p = influxdb_client.Point(
-                "object_value").tag("id", str(_id)) \
-                .tag("uid", str(uid)) \
-                .field("value", value2)
-        except ValueError:
-            value2 = str(value)
-            p = influxdb_client.Point(
-                "object_value").tag("id", str(_id)) \
-                .tag("uid", str(uid)) \
-                .field("value_string", value2)
-        self.write(p)
-
-    def query_history_by_id(self, start: str, stop: str, _id: str = "",
-                            uid: str = "", skip: int = 0,
+    def query_history_by_id(self, start: str, stop: str, _ids: list[str] = "",
+                            uids: list[str] = "", skip: int = 0,
                             limit: int = None) -> list[dict]:
         stop_str = ""
         if stop:
             stop_str = f", stop: {stop}"
-        id_str = ""
-        if _id:
-            id_str = f"""|> filter(fn:(r) => r.id == "{_id}")"""
-        uid_str = ""
-        if uid:
-            uid_str = f"""|> filter(fn:(r) => r.uid == "{uid}")"""
+
+        if _ids is None:
+            ids_str = ""
+        else:
+            ids_str = """|> filter(fn:(r) => """
+            combine = " or ".join([f'''r.id == "{_id}"''' for _id in _ids]) + ")"
+            ids_str += combine
+
+        if uids is None:
+            uids_str = ""
+        else:
+            uids_str = """|> filter(fn:(r) => """
+            combine = " or ".join([f'''r.uid == "{_uid}"''' for _uid in uids]) + ")"
+            uids_str += combine
+
         stmt = f'''from(bucket:"node_object")
 |> range(start: {start}{stop_str})
 |> filter(fn:(r) => r._measurement == "object_value")
-{id_str}
-{uid_str}'''
+{ids_str}
+{uids_str}'''
         d = self.query(stmt)
         result = []
         for table in d:

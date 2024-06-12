@@ -59,11 +59,13 @@ class InsertValue(BaseModel):
     value: str
     timestamp: float = None
 
+
 class GetValue(BaseModel):
     id: int
     uid: str
     value: str
     timestamp: float
+
 
 class InsertValueModify(BaseModel):
     uid: str

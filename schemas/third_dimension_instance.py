@@ -18,7 +18,7 @@ class ThirdDimensionInstanceBasic(BaseModel):
 
 
 class ThirdDimensionInstance(ThirdDimensionInstanceBasic):
-    id: str
+    id: int
     node_id: int | None = None
 
     updated_at: datetime.datetime

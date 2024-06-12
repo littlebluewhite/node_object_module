@@ -213,22 +213,23 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
             id_set = set()
             id_value_dict: dict = dict()
             insert_data: dict = dict()
+            timestamp = time.time()
             for data in insert_list:
-                id_value_dict[data.id] = (data.value, data.timestamp)
+                id_value_dict[data.id] = (data.value, timestamp if data.timestamp is None else data.timestamp)
                 id_set.add(data.id)
             object_list = self.object_operate.read_from_redis_by_key_set(id_set)
-            timestamp = time.time()
             for data in object_list:
-                v = {
+                _template = {
                     "id": data["id"],
                     "uid": data["uid"],
                     "value": id_value_dict[data["id"]][0],
-                    "timestamp": timestamp if id_value_dict[data["id"]][1] is None else id_value_dict[data["id"]][1]
+                    "timestamp": id_value_dict[data["id"]][1]
                 }
-                insert_data[data["id"]] = v
+                insert_data[data["id"]] = _template
 
-                # 背景寫入歷史資料
-                background_tasks.add_task(self.write_to_history, data["id"], data["uid"], id_value_dict[data["id"]][0])
+            # 背景寫入歷史資料
+            points = self.transfer_to_point(insert_data)
+            background_tasks.add_task(self.write, points)
 
             return JSONResponse(content="ok")
 
@@ -237,23 +238,25 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
             uid_set = set()
             uid_value_dict: dict = dict()
             insert_data: dict = dict()
+            timestamp = time.time()
             for data in insert_list:
-                uid_value_dict[data.uid] = (data.value, data.timestamp)
+                uid_value_dict[data.uid] = (data.value, timestamp if data.timestamp is None else data.timestamp)
                 uid_set.add(data.uid)
             _obj_mapping = self.object_operate.read_from_redis_by_key_set_return_dict(uid_set, table_index=1)
             _obj_id = {_id[0] for _id in _obj_mapping.values()}
             object_list = self.object_operate.read_from_redis_by_key_set(_obj_id)
-            timestamp = time.time()
             for data in object_list:
                 _template = {
                     "id": data["id"],
                     "uid": data["uid"],
                     "value": uid_value_dict[data["uid"]][0],
-                    "timestamp": timestamp if uid_value_dict[data["uid"]][1] is None else uid_value_dict[data["uid"]][1]
+                    "timestamp": uid_value_dict[data["uid"]][1]
                 }
                 insert_data[data["id"]] = _template
-                # 背景寫入歷史資料
-                background_tasks.add_task(self.write_to_history, _template["id"], _template["uid"], _template["value"])
+
+            # 背景寫入歷史資料
+            points = self.transfer_to_point(insert_data)
+            background_tasks.add_task(self.write, points)
 
             return JSONResponse(content="ok")
 
@@ -281,9 +284,9 @@ class APIObjectRouter(APIObjectFunction, APIObjectOperate):
 
         @router.get("/history_value/", response_model=list[get_value_schemas])
         async def get_history_value(
-                start: str = Query(...), stop: str = Query(""), _id: str = Query(""),
-                uid: str = Query(""), skip: int = Query(0), limit: int = Query(None)):
+                start: str = Query(...), stop: str = Query(""), _ids: list[str] = Query(None),
+                uids: list[str] = Query(None), skip: int = Query(0), limit: int = Query(None)):
             return JSONResponse(content=self.query_history_by_id(
-                start, stop, _id, uid, skip, limit))
+                start, stop, _ids, uids, skip, limit))
 
         return router
