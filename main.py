@@ -48,7 +48,7 @@ app.add_middleware(
 redis_db = RedisDB(ConfigManager.redis.to_dict()).redis_client()
 
 # SQL DB
-db = SQLDB(ConfigManager.sql.to_dict())
+db = SQLDB(ConfigManager.sql.to_dict(), True)
 #   create SQL models
 models.Base.metadata.create_all(bind=db.get_engine())
 

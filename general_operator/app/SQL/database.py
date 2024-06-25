@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 class SQLDB:
-    def __init__(self, db_config:dict):
+    def __init__(self, db_config:dict, echo=False):
         self.host = db_config["host"]
         self.port = db_config["port"]
         self.db = db_config["db"]
@@ -16,7 +16,7 @@ class SQLDB:
         self.url = f"mysql+pymysql://{self.user}:{self.password}" \
                    f"@{self.host}:{self.port}/{self.db}"
         # self.url = "postgresql://postgres:123456@localhost:5432/dispatch"
-        self.engine = create_engine(self.url, echo=True, pool_size=10, max_overflow=20, pool_recycle=self.pool_recycle)
+        self.engine = create_engine(self.url, echo=echo, pool_size=10, max_overflow=20, pool_recycle=self.pool_recycle)
 
     def get_engine(self):
         return self.engine
