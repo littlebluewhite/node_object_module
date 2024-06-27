@@ -5,7 +5,59 @@ import redis
 from fastapi.encoders import jsonable_encoder
 
 
-class RedisOperate:
+class OperateFunction:
+    @staticmethod
+    def write_main_table(sql_data_list: list, schemas_model, set_mapping: dict):
+        result = []
+        for sql_data in sql_data_list:
+            row = schemas_model(**jsonable_encoder(sql_data))
+            value = row.json()
+            set_mapping[getattr(row, "id")] = value
+            result.append(row)
+        return result
+
+    @staticmethod
+    def write_index_table(sql_data_list: list, schemas_model, set_mapping: dict, key: str,
+                          table_name: str, r: redis.Redis):
+        result = []
+        # 取得初始資料
+        key_list = [sql_data[key] for sql_data in sql_data_list]
+        r_data = r.hmget(table_name, key_list)
+        set_mapping.update({x[0]: json.loads(x[1]) for x in zip(key_list, r_data) if x[1] is not None})
+        # sql type 是 json list的情況
+        if isinstance((sql_data_list[0].get(key), None), list):
+            for sql_data in sql_data_list:
+                row = schemas_model(**jsonable_encoder(sql_data))
+                for item in getattr(row, key):
+                    original_data = set_mapping.get(item, None)
+                    if original_data:
+                        value_list = json.loads(original_data)
+                        value_list.append(row.id)
+                        set_mapping[item] = json.dumps(value_list)
+                    else:
+                        set_mapping[item] = json.dumps([row.id])
+                result.append(row)
+
+        # sql type 是單一值的情況
+        else:
+            for sql_data in sql_data_list:
+                row = schemas_model(**jsonable_encoder(sql_data))
+                original_data = set_mapping.get(getattr(row, key), None)
+                if original_data:
+                    value_list = json.loads(original_data)
+                    value_list.append(row.id)
+                    set_mapping[getattr(row, key)] = json.dumps(value_list)
+                else:
+                    set_mapping[getattr(row, key)] = json.dumps([row.id])
+                result.append(row)
+
+        return result
+
+
+
+
+
+class RedisOperate(OperateFunction):
     def __init__(self, redis_db: redis.Redis, exc):
         self.redis = redis_db
         self.exc = exc
@@ -21,56 +73,56 @@ class RedisOperate:
 
     def write_sql_data_to_redis(self, table_name: str,
                                 sql_data_list: list, schemas_model,
-                                key: str = "id", update_list: list = None) -> list:
+                                key: str = "id") -> list:
         """
 
         :param table_name:
         :param sql_data_list:
         :param schemas_model:
         :param key:
-        :param update_list: update sql table可以加此參數，減少對redis的訪問，不加也可以
         :return:
         """
-        update_dict = dict()
-        if update_list is None:
-            update_list = list()
-        for update_data in update_list:
-            update_dict[update_data.id] = update_data
+        if not sql_data_list:
+            return list()
         result: list[Any] = list()
         # 將要寫入redis的資料
         set_mapping: dict = dict()
-        for sql_data in sql_data_list:
-            row = schemas_model(**jsonable_encoder(sql_data))
-            # 寫入主表
-            if key == "id":
-                value = row.json()
-                set_mapping[getattr(row, key)] = value
-            # 寫入附表(index table)
-            elif not update_list or getattr(update_dict.get(row.id, None), key, None) is not None:
-                # sql type 是 json list的情況
-                if isinstance(getattr(row, key), list):
-                    for item in getattr(row, key):
-                        original_data = set_mapping.get(item, None)
-                        if original_data:
-                            value_list = json.loads(original_data)
-                            value_list.append(row.id)
-                            set_mapping[item] = json.dumps(value_list)
-                        else:
-                            set_mapping[item] = json.dumps([row.id])
-                # sql type 是單一值的情況
-                else:
-                    item = getattr(row, key)
-                    # key可能為空值得情況
-                    if item is not None:
-                        original_data = set_mapping.get(item, None)
-                        if original_data:
-                            value_list = json.loads(original_data)
-                            value_list.append(row.id)
-                            set_mapping[item] = json.dumps(value_list)
-                        else:
-                            set_mapping[item] = json.dumps([row.id])
-
-            result.append(row)
+        if key == "id":
+            result = self.write_main_table(sql_data_list, schemas_model, set_mapping)
+        else:
+            result = self.write_index_table(sql_data_list, schemas_model, set_mapping, key, table_name, self.redis)
+        # for sql_data in sql_data_list:
+        #     row = schemas_model(**jsonable_encoder(sql_data))
+        #     # 寫入主表
+        #     if key == "id":
+        #         value = row.json()
+        #         set_mapping[getattr(row, key)] = value
+        #     # 寫入附表(index table)
+        #     else:
+        #         # sql type 是 json list的情況
+        #         if isinstance(getattr(row, key), list):
+        #             for item in getattr(row, key):
+        #                 original_data = set_mapping.get(item, None)
+        #                 if original_data:
+        #                     value_list = json.loads(original_data)
+        #                     value_list.append(row.id)
+        #                     set_mapping[item] = json.dumps(value_list)
+        #                 else:
+        #                     set_mapping[item] = json.dumps([row.id])
+        #         # sql type 是單一值的情況
+        #         else:
+        #             item = getattr(row, key)
+        #             # key可能為空值得情況
+        #             if item is not None:
+        #                 original_data = set_mapping.get(item, None)
+        #                 if original_data:
+        #                     value_list = json.loads(original_data)
+        #                     value_list.append(row.id)
+        #                     set_mapping[item] = json.dumps(value_list)
+        #                 else:
+        #                     set_mapping[item] = json.dumps([row.id])
+        #
+        #     result.append(row)
         # 統一set data
         if set_mapping:
             self.redis.hset(table_name, mapping=set_mapping)

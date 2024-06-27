@@ -1,3 +1,5 @@
+import json
+
 import redis
 from redis.cluster import ClusterNode
 from redis.cluster import RedisCluster
@@ -51,5 +53,21 @@ class RedisDB:
             print(f"Error: {e}")
             return False
 
-    if __name__ == "__main__":
-        pass
+
+if __name__ == "__main__":
+    r = RedisDB(redis_config={
+        "host": "127.0.0.1",
+        "port": 6379,
+        "db": 6,
+        "user": "",
+        "password": ""
+    })
+    rdb = r.redis_client()
+    d = rdb.hmget("source_group_by_source_id", ["1", "200", "3"])
+    print(d)
+    for i in d:
+        if i:
+            a = json.loads(i)
+            print(type(a))
+            print(a)
+
