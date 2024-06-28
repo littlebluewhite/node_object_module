@@ -28,7 +28,7 @@ from app.SQL import models
 from function.config_manager import ConfigManager
 from general_operator.function.exception import GeneralOperatorException
 from general_operator.app.influxdb.influxdb import InfluxDB
-from general_operator.app.redis_db._redis import RedisDB
+from general_operator.app.redis_db.redis_db import RedisDB
 from routers.API.API_control_href_group import APIControlHrefGroup
 from routers.API.API_node import APINodeRouter
 from routers.API.API_object import APIObjectRouter

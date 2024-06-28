@@ -21,18 +21,20 @@ class OperateFunction:
                           table_name: str, r: redis.Redis):
         result = []
         # 取得初始資料
-        key_list = [sql_data[key] for sql_data in sql_data_list]
+        key_list = [getattr(schemas_model(**jsonable_encoder(sql_data)), key) for sql_data in sql_data_list]
+        # key_list = [sql_data[key] for sql_data in sql_data_list]
         r_data = r.hmget(table_name, key_list)
-        set_mapping.update({x[0]: json.loads(x[1]) for x in zip(key_list, r_data) if x[1] is not None})
+        set_mapping.update({x[0]: x[1] for x in zip(key_list, r_data) if x[1] is not None})
         # sql type 是 json list的情況
-        if isinstance((sql_data_list[0].get(key), None), list):
+        if isinstance(getattr(schemas_model(**jsonable_encoder(sql_data_list[0])), key), list):
             for sql_data in sql_data_list:
                 row = schemas_model(**jsonable_encoder(sql_data))
                 for item in getattr(row, key):
                     original_data = set_mapping.get(item, None)
                     if original_data:
                         value_list = json.loads(original_data)
-                        value_list.append(row.id)
+                        if row.id not in value_list:
+                            value_list.append(row.id)
                         set_mapping[item] = json.dumps(value_list)
                     else:
                         set_mapping[item] = json.dumps([row.id])
@@ -45,7 +47,8 @@ class OperateFunction:
                 original_data = set_mapping.get(getattr(row, key), None)
                 if original_data:
                     value_list = json.loads(original_data)
-                    value_list.append(row.id)
+                    if row.id not in value_list:
+                        value_list.append(row.id)
                     set_mapping[getattr(row, key)] = json.dumps(value_list)
                 else:
                     set_mapping[getattr(row, key)] = json.dumps([row.id])
