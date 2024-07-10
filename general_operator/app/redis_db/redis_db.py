@@ -8,7 +8,6 @@ from redis.cluster import RedisCluster
 class RedisDB:
     def __init__(self, redis_config, decode_responses=False):
         self.host = redis_config["host"]
-        self.port = redis_config["port"]
         self.db = redis_config["db"]
         self.username = redis_config["user"]
         self.password = redis_config["password"]
@@ -19,45 +18,34 @@ class RedisDB:
         if self.is_cluster:
             return self.__new_cluster()
         else:
-            return self.__new_redis()
+            return self.__new_single()
 
     def __new_cluster(self):
-        nodes = [ClusterNode(self.host, self.port)]
+        nodes = [ClusterNode(s.strip().split(":")[0], s.strip().split(":")[1]) for s in self.host.split(",")]
         return RedisCluster(startup_nodes=nodes,
                             username=self.username,
                             password=self.password,
                             decode_responses=self.decode_responses)
 
-    def __new_redis(self):
-        return redis.Redis(host=self.host,
-                           port=self.port,
+    def __new_single(self):
+        return redis.Redis(host=self.host.strip().split(":")[0],
+                           port=self.host.strip().split(":")[1],
                            db=self.db,
                            username=self.username,
                            password=self.password,
                            decode_responses=self.decode_responses)
 
     def __is_redis_cluster(self):
-        try:
-            # Create a Redis client
-            r = redis.StrictRedis(host=self.host, port=self.port,
-                                  username=self.username,
-                                  password=self.password)
-            cluster_info = r.execute_command('CLUSTER INFO')
-
-            return cluster_info['cluster_state'] == 'ok'
-        except redis.exceptions.ResponseError as e:
-            # If a ResponseError is raised, it's not in cluster mode
-            return False
-        except Exception as e:
-            # Handle other exceptions (e.g., connection errors)
-            print(f"Error: {e}")
+        host = self.host.split(",")
+        if len(host) > 1:
+            return True
+        else:
             return False
 
 
 if __name__ == "__main__":
     r = RedisDB(redis_config={
-        "host": "127.0.0.1",
-        "port": 6379,
+        "host": "127.0.0.1:6379",
         "db": 6,
         "user": "",
         "password": ""
