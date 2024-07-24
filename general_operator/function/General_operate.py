@@ -103,7 +103,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
         sql_data_list = self.create_sql(db, data_list)
         self.update_redis_table(sql_data_list)
         self.reload_redis_table(db, self.reload_related_redis_tables, sql_data_list)
-        return sql_data_list
+        return jsonable_encoder(sql_data_list)
 
     def update_data(self, db: Session, update_list: list) -> list:
         # 取得更新前的self reference id
@@ -124,7 +124,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
         # 重寫redis相關表
         self.reload_redis_table(
             db, self.reload_related_redis_tables, sql_data_list, original_ref_id_dict)
-        return sql_data_list
+        return jsonable_encoder(sql_data_list)
 
     def delete_data(self, db: Session, id_set: set[int]) -> str:
         data_list = self.delete_sql(db, id_set)
