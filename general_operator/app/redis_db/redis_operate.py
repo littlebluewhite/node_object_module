@@ -49,9 +49,7 @@ class RedisOperate(OperateFunction):
             return dict()
         key_list = list(key_set)
         raw_data = self.redis.hmget(table_name, key_list)
-        # return {key.decode("utf-8"): json.loads(value.decode("utf-8"))
-        #         for key, value in raw_data.items()}
-        return {key: json.loads(data.decode("utf-8")) for key, data in zip(key_list, raw_data)}
+        return {key: json.loads(data.decode("utf-8")) for key, data in zip(key_list, raw_data) if data is not None}
 
     def read_redis_all_data(self, table_name: str) -> list[dict]:
         result = []
