@@ -10,8 +10,10 @@ from ..function.General_operate import GeneralOperate
 
 
 class GeneralRouter(GeneralOperate):
-    def __init__(self, module, redis_db: redis.Redis, influxdb: InfluxDB, exc, db_session: sessionmaker):
+    def __init__(self, module, redis_db: redis.Redis, influxdb: InfluxDB, exc,
+                 db_session: sessionmaker, is_initial=False):
         self.db_session = db_session
+        self.is_initial = is_initial
         GeneralOperate.__init__(self, module, redis_db, influxdb, exc)
 
     def create(self):
@@ -26,8 +28,10 @@ class GeneralRouter(GeneralOperate):
 
         @router.on_event("startup")
         async def task_startup_event():
-            # pass
-            GeneralOperate.initial_redis_data(self, self.db_session)
+            if self.is_initial:
+                db = self.db_session()
+                GeneralOperate.initial_redis_data(self, db)
+                db.close()
 
         @router.get("/", response_model=list[self.module.main_schemas])
         async def sql_read_all(db: Session = Depends(create_get_db(self.db_session))):
@@ -91,5 +95,10 @@ class GeneralRouter(GeneralOperate):
         async def delete_multiple(id_set: set[int], db: Session = Depends(create_get_db(self.db_session))):
             with db.begin():
                 return JSONResponse(content=GeneralOperate.delete_data(self, db, id_set))
+
+        @router.get("/reload_table/")
+        async def reload_table(db: Session = Depends(create_get_db(self.db_session))):
+            GeneralOperate.initial_redis_data(self, db)
+            return JSONResponse(content="ok")
 
         return router

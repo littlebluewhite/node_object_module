@@ -30,9 +30,4 @@ server:
   rear_timeout: 300  # s
   write_timeout: 300  # s
 
-  account_using: True
-  account_host: 192.168.1.10
-  account_port: 9600
-
-  redis_cb_db: 15
-  redis_cb_bucket:  
+  is_initial: false

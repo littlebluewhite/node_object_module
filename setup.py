@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='general_operator',
-    version='0.2.0',
+    version='0.2.1',
     packages=['general_operator', 'general_operator.app', 'general_operator.app.SQL', 'general_operator.app.influxdb',
               'general_operator.app.redis_db', 'general_operator.dependencies', 'general_operator.function', 'general_operator.routers',],
     install_requires=[

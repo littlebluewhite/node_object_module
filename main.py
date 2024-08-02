@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import data
 import data.API.API_node
 import data.API.API_object
 import data.API.API_control_href_group
@@ -33,6 +34,7 @@ from routers.API.API_control_href_group import APIControlHrefGroup
 from routers.API.API_node import APINodeRouter
 from routers.API.API_object import APIObjectRouter
 from general_operator.routers.General_table_router import GeneralRouter
+from general_operator.routers.all_table import AllTableRouter
 
 app = FastAPI(title="node_object_app")
 
@@ -103,6 +105,10 @@ app.include_router(GeneralRouter(data.control_href_item_template, redis_db, infl
                                  GeneralOperatorException, db_session).create())
 app.include_router(GeneralRouter(data.fake_data_config_template, redis_db, influxdb,
                                  GeneralOperatorException, db_session).create())
+
+app.include_router(AllTableRouter(module=data, redis_db=redis_db, influxdb=influxdb,
+                                  exc=GeneralOperatorException, db_session=db_session,
+                                  is_initial=ConfigManager.server.is_initial).create())
 
 
 @app.exception_handler(GeneralOperatorException)

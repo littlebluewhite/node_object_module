@@ -4,7 +4,7 @@
 import redis
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import text
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from ..app.SQL.sql_operate import SQLOperate
 from ..app.influxdb.influxdb import InfluxDB
@@ -27,8 +27,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
         InfluxOperate.__init__(self, influxdb, exc)
 
     # reload redis_db table from sql for INITIAL
-    def initial_redis_data(self, db_session: sessionmaker):
-        db = db_session()
+    def initial_redis_data(self, db: Session):
         # sql 取資料
         sql_data = SQLOperate.get_all_sql_data(db, self.sql_model)
         self.write_to_redis("count", self.module.name, len(sql_data))
@@ -37,7 +36,6 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
             self.clean_redis_by_name(table["name"])
             # 將sql資料寫入redis表
             self.write_sql_data_to_redis(table["name"], sql_data, self.main_schemas, table["key"])
-        db.close()
 
     def reload_redis_table(self, db, reload_related_redis_tables, sql_data_list, origin_ref_id_dict=None):
         if origin_ref_id_dict is None:
