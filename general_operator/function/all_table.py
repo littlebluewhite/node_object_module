@@ -21,9 +21,10 @@ class AllTableOperator:
         imported_modules = []
         path = self.module.__path__[0]
         for filename in os.listdir(path):
-            if filename.endswith(".py") and filename != "__init__.py":
+            if ((filename.endswith(".py") or filename.endswith(".pyc")) and
+                filename != "__init__.py" and filename != "__init__.pyc"):
                 # Get the module name by stripping the .py extension
-                module_name = filename[:-3]
+                module_name = ".".join(filename.split(".")[:-1])
 
                 # Construct the module's file path
                 module_file_path = os.path.join(path, filename)

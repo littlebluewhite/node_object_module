@@ -2,7 +2,6 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
 import data
 import data.API.API_node
 import data.API.API_object
