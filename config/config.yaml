@@ -2,7 +2,7 @@ redis:
   host: 127.0.0.1:6379
   user:
   password:
-  db: 2
+  db: 1
 sql:
   host: 127.0.0.1
   port: 3306
@@ -30,4 +30,4 @@ server:
   rear_timeout: 300  # s
   write_timeout: 300  # s
 
-  is_initial: false
+  is_initial: true

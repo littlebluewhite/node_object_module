@@ -24,7 +24,6 @@ class RedisOperate(OperateFunction):
                                 sql_data_list: list, schemas_model,
                                 key: str = "id") -> list:
         """
-
         :param table_name:
         :param sql_data_list:
         :param schemas_model:

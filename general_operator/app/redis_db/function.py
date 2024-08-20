@@ -75,8 +75,20 @@ class OperateFunction:
         # 處理single key
         # 取得初始資料
         value_list = [getattr(schemas_model(**jsonable_encoder(sql_data)), key) for sql_data in sql_data_list]
-        # key_list = [sql_data[key] for sql_data in sql_data_list]
-        r_data = r.hmget(table_name, value_list)
+
+        # 處理None的資料
+        # 取得None的index
+        none_indices = [index for index, value in enumerate(value_list) if value is None]
+        value_list = [value for value in value_list if value is not None]
+
+        r_data = list()
+        if value_list:
+            r_data = r.hmget(table_name, value_list)
+
+        # 講None塞回r_data
+        for index in none_indices:
+            r_data.insert(index, None)
+
         set_mapping.update({x[0]: x[1] for x in zip(value_list, r_data) if x[1] is not None})
         # sql type 是 json list的情況
         if isinstance(getattr(schemas_model(**jsonable_encoder(sql_data_list[0])), key), list):
@@ -97,13 +109,16 @@ class OperateFunction:
         else:
             for sql_data in sql_data_list:
                 row = schemas_model(**jsonable_encoder(sql_data))
-                original_data = set_mapping.get(getattr(row, key), None)
-                if original_data:
-                    ids_list = json.loads(original_data)
-                    if row.id not in ids_list:
-                        ids_list.append(row.id)
-                    set_mapping[getattr(row, key)] = json.dumps(ids_list)
-                else:
-                    set_mapping[getattr(row, key)] = json.dumps([row.id])
+                value = getattr(row, key)
+                if value:
+                    # value有值
+                    original_data = set_mapping.get(value, None)
+                    if original_data:
+                        ids_list = json.loads(original_data)
+                        if row.id not in ids_list:
+                            ids_list.append(row.id)
+                        set_mapping[getattr(row, key)] = json.dumps(ids_list)
+                    else:
+                        set_mapping[getattr(row, key)] = json.dumps([row.id])
                 result.append(row)
         return result
