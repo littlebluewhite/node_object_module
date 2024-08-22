@@ -76,5 +76,3 @@ class ConfigManager:
                         config[key] = cls.convert_type(env_value, type(value))
         return config
 
-
-ConfigManager.read_yaml("config/config.yaml")

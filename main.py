@@ -2,7 +2,6 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import data
 import data.API.API_node
 import data.API.API_object
 import data.API.API_control_href_group
@@ -25,7 +24,7 @@ import data.object_template
 import data.third_dimension_instance
 from general_operator.app.SQL.database import SQLDB
 from app.SQL import models
-from function.config_manager import ConfigManager
+from util.config_manager import ConfigManager
 from general_operator.function.exception import GeneralOperatorException
 from general_operator.app.influxdb.influxdb import InfluxDB
 from general_operator.app.redis_db.redis_db import RedisDB
@@ -35,6 +34,7 @@ from routers.API.API_object import APIObjectRouter
 from general_operator.routers.General_table_router import GeneralRouter
 from general_operator.routers.all_table import AllTableRouter
 
+ConfigManager.read_yaml("config/config.yaml")
 app = FastAPI(title="node_object_app")
 
 app.add_middleware(
@@ -114,13 +114,15 @@ app.include_router(AllTableRouter(module=data, redis_db=redis_db, influxdb=influ
 async def unicorn_exception_handler(request: Request, exc: GeneralOperatorException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"message": f"{exc.detail}"},
+        content={"message": f"{exc.message}", "message_code": f"{exc.message_code}"},
+        headers={"message": f"{exc.message}", "message_code": f"{exc.message_code}"}
     )
 
 
 @app.get("/exception")
 async def test_exception():
-    raise GeneralOperatorException(status_code=423, detail="test exception")
+    raise GeneralOperatorException(status_code=423, message="test exception", message_code=2)
+
 
 
 if __name__ == "__main__":

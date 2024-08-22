@@ -204,7 +204,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
 
     def create_many2many_stmt(self, table: dict, id_set: set) -> str:
         if len(id_set) < 1:
-            raise self.exc(status_code=406, detail="reference id is not correct")
+            raise self.exc(status_code=485, message="reference id is not correct", message_code=1)
         elif len(id_set) == 1:
             where_condition_stmt = f"{str(tuple(id_set))}".replace(',', '')
         else:

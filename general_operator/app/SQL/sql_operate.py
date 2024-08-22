@@ -83,11 +83,11 @@ class SQLOperate:
         except IntegrityError as e:
             code, msg = e.orig.args
             if code in [1062, 1406, 1452]:
-                raise self.exc(status_code=403, detail=msg)
+                raise self.exc(status_code=486, message=msg, message_code=code)
             else:
-                raise self.exc(status_code=403, detail="Unrecognized SQL error")
+                raise self.exc(status_code=486, message="Unrecognized SQL error", message_code=1)
         except UnmappedInstanceError:
-            raise self.exc(status_code=404, detail=f"id: one or more of {update_data_id_set} is not exist")
+            raise self.exc(status_code=486, message=f"id: one or more of {update_data_id_set} is not exist", message_code=2)
 
     def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model):
         try:
@@ -97,9 +97,9 @@ class SQLOperate:
         except IntegrityError as e:
             code, msg = e.orig.args
             if code == 1451:
-                raise self.exc(status_code=403, detail=msg)
+                raise self.exc(status_code=486, message=msg, message_code=code)
         except UnmappedInstanceError:
-            raise self.exc(status_code=404, detail=f"id: one or more of {str(id_set)} is not exist")
+            raise self.exc(status_code=486, message=f"id: one or more of {str(id_set)} is not exist", message_code=2)
 
 
 if __name__ == "__main__":

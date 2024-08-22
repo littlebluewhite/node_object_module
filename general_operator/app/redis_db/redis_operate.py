@@ -67,7 +67,7 @@ class RedisOperate(OperateFunction):
             return list()
         raw_data = self.redis.hmget(table_name, list(key_set))
         if None in raw_data:
-            raise self.exc(status_code=404, detail=f"id:{key_set} is not exist")
+            raise self.exc(status_code=487, message=f"id:{key_set} is not exist", message_code=1)
         return [json.loads(data) for data in raw_data]
 
     def delete_redis_data(self, table_name: str, data_list: list, schemas_model,
