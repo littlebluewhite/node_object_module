@@ -59,7 +59,10 @@ class DealSystemLog:
             return self.url_mapping.get(self.request.url.path)
         else:
             url_path = self.request.url.path.split("/")
-            return url_path[1], url_path[2], url_path[3]
+            if len(url_path) < 5:
+                return "error", "error", "error"
+            else:
+                return url_path[2], url_path[3], url_path[4]
 
     def __get_message(self, headers):
         status_code = str(self.response.status_code)
@@ -81,7 +84,7 @@ class DealSystemLog:
     def __write_log_g(log, system_log_g_server):
         with grpc.insecure_channel(f"{system_log_g_server}") as channel:
             stub = system_log_pb2_grpc.SystemLogServiceStub(channel)
-            request = stub.WriteLog(system_log_pb2.LogRequest(
+            request = system_log_pb2.LogRequest(
                 timestamp=log.timestamp,
                 module=log.module,
                 submodule=log.submodule,
@@ -96,7 +99,7 @@ class DealSystemLog:
                 api_url=log.api_url,
                 query_params=log.query_params,
                 web_path=log.web_path
-            ))
+            )
             return stub.WriteLog(request)
 
     @staticmethod

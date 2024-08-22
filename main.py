@@ -24,7 +24,7 @@ import data.object_template
 import data.third_dimension_instance
 from general_operator.app.SQL.database import SQLDB
 from app.SQL import models
-from util.config_manager import ConfigManager
+from general_util.config_manager import ConfigManager
 from general_operator.function.exception import GeneralOperatorException
 from general_operator.app.influxdb.influxdb import InfluxDB
 from general_operator.app.redis_db.redis_db import RedisDB
