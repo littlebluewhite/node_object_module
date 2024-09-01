@@ -29,15 +29,15 @@ class SQLOperate:
         except IntegrityError as e:
             code, msg = e.orig.args
             if code == 1452:
-                raise self.exc(status_code=403, detail=msg)
+                raise self.exc(status_code=486, message=msg, message_code=1452)
             elif code == 1062:
-                raise self.exc(status_code=403, detail=msg)
+                raise self.exc(status_code=486, message=msg, message_code=1452)
 
     def get_sql_data(self, db: Session, sql_model, field_value_set: set,
                      sql_field: str = "id", check_data_list: bool = True) -> list:
         data_list = db.query(sql_model).filter(getattr(sql_model, sql_field).in_(field_value_set)).all()
         if not data_list and check_data_list:
-            raise self.exc(status_code=404, detail=f"one or more {sql_field} value are not in {field_value_set}")
+            raise self.exc(status_code=486, message=f"one or more {sql_field} value are not in {field_value_set}", message_code=3)
         return data_list
 
     @staticmethod
@@ -65,7 +65,7 @@ class SQLOperate:
                 update_data_id_set.add(update_data.id)
             sql_data_list = db.query(sql_model).filter(sql_model.id.in_({i.id for i in update_list})).all()
             if len(sql_data_list) != len(update_data_id_set):
-                raise self.exc(status_code=404, detail=f"id: one or many of {update_data_id_set} is not exist")
+                raise self.exc(status_code=486, message=f"id: one or many of {update_data_id_set} is not exist", message_code=4)
             for sql_data in sql_data_list:
                 update_data = update_data_dict[getattr(sql_data, "id")]
                 for item in update_data:

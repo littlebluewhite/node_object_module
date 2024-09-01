@@ -20,22 +20,21 @@ class DealSystemLog:
             self.code_rules = code_rules
 
     async def deal(self, system_log_g_server):
-        print("start deal log")
         log = self.__create_system_log()
         print("write log: ", self.__write_log_g(log, system_log_g_server))
 
     async def deal_r(self, system_log_r_server):
-        print("start deal log")
         log = self.__create_system_log()
         print("write log: ", self.__write_log_r(log, system_log_r_server))
 
 
     def __create_system_log(self):
-        headers: dict = dict(self.response.headers)
+        response_headers: dict = dict(self.response.headers)
+        request_headers: dict  = dict(self.request.headers)
         module, submodule, item = self.__get_module_submodule_item()
-        headers["custom_header"] = "custom_value"
-        self.response.init_headers(headers)
-        message, message_code = self.__get_message(headers)
+        response_headers["check_header"] = "check_value"
+        self.response.init_headers(response_headers)
+        message, message_code = self.__get_message(response_headers)
         t = time.time()
         return Log(
             timestamp= t,
@@ -46,12 +45,12 @@ class DealSystemLog:
             status_code=f"{self.response.status_code}",
             message_code=message_code,
             message=message,
-            response_size=headers.get("content-length", ""),
-            account=headers.get("account", ""),
+            response_size=response_headers.get("content-length", ""),
+            account=request_headers.get("account", ""),
             ip=self.request.client.host,
             api_url=self.request.url.path,
             query_params=self.request.url.query,
-            web_path=headers.get("web_path", "")
+            web_path=request_headers.get("web-path", "")
         )
 
     def __get_module_submodule_item(self):

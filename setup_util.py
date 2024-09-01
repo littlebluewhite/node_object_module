@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='general_util',
-    version='0.0.9',
+    version='0.0.11',
     packages=['general_util', 'general_util.log', 'general_util.log.proto'],
     install_requires=[
         'aiohttp>=3.10.3',
@@ -10,7 +10,6 @@ setup(
         'grpcio>=1.65.4',
         'grpcio-tools>=1.65.4',
         'PyYAML>=6.0.2',
-        'pydantic>=2.0.1',
         'requests>=2.32.3',
     ],
     author='wilson',

@@ -83,7 +83,9 @@ class RedisOperate(OperateFunction):
         """
         p = self.redis.pipeline()
         update_dict = dict()
+        is_update = True
         if update_list is None:
+            is_update = False
             update_list = list()
         for update_data in update_list:
             update_dict[update_data.id] = update_data
@@ -112,8 +114,8 @@ class RedisOperate(OperateFunction):
             else:
                 if getattr(update_dict.get(row.id, None), key, None) is not None:
                     has_key = True
-
-            if not update_list or has_key:
+            # 是 (update且有key的情況) 或 單純刪除表
+            if (is_update and has_key) or not is_update :
                 # key是complex的情況
                 if is_complex_key:
                     complex_value = ""

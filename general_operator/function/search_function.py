@@ -1,5 +1,7 @@
 from fastapi import HTTPException
 
+from .exception import GeneralOperatorException
+
 
 def deal_range(_range: list[str]):
     """
@@ -17,7 +19,7 @@ def deal_range(_range: list[str]):
     for item in _range:
         r_list = item.replace(" ", "").split(",")
         if len(r_list) != 3:
-            raise HTTPException(status_code=406, detail="query range do not accept")
+            raise GeneralOperatorException(status_code=485, message="query range do not accept", message_code=2)
         if r_list[1] != "null":
             result += f"{r_list[0]} >= '{r_list[1]}' and "
         if r_list[2] != "null":
@@ -39,7 +41,7 @@ def deal_value_in(_value_in: list[str]):
     for item in _value_in:
         v_list = item.replace(" ", "").split(",")
         if len(v_list) < 2:
-            raise HTTPException(status_code=406, detail="query value in miss some params")
+            raise GeneralOperatorException(status_code=485, message="query value in miss some params", message_code=3)
         if len(v_list) == 2:
             result += f"{v_list[0]} in {str(tuple(v_list[1:])).replace(',', '')} and "
         else:
@@ -60,6 +62,6 @@ def deal_json_in(_json_in: list[str]):
     for item in _json_in:
         j_list = item.replace(" ", "").split(",")
         if len(j_list) != 2:
-            raise HTTPException(status_code=406, detail="query json in do not match")
+            raise GeneralOperatorException(status_code=485, message="query json in do not match", message_code=4)
         result += f"json_search(json_extract({j_list[0]}, '$[*]'),'all', '{j_list[1]}') is not null and "
     return result
