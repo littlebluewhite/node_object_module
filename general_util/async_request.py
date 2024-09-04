@@ -3,25 +3,36 @@ import aiohttp
 import requests
 
 
-async def fetch(urls: list[str], headers: dict = None):
-    async with aiohttp.ClientSession() as session:
+async def fetch(urls: list[str], headers: dict = None, timeout: int = 5):
+    timeout_setting = aiohttp.ClientTimeout(total=timeout)
+    async with aiohttp.ClientSession(timeout=timeout_setting) as session:
         tasks = [fetch_data(session, url, headers) for url in urls]
         return await asyncio.gather(*tasks)
 
 
 async def fetch_data(session, url, headers):
-    async with session.get(url, headers=headers) as response:
-        return await response.json()
+    try:
+        async with session.get(url, headers=headers) as response:
+            return await response.json()
+    except asyncio.TimeoutError:
+        print("error", f"Timeout occurred for {url}")
+        return {"error": f"Timeout occurred for {url}"}
+    except Exception as e:
+        print("error", f"An error occurred while fetching {url}: {e}")
+        return {"error": f"An error occurred while fetching {url}: {e}"}
 
 
-def sync_fetch(urls: list[str]):
+def sync_fetch(urls: list[str], headers: dict = None, timeout: int = 5):
     result = []
     try:
         for url in urls:
-            response = requests.get(url)
-            response.raise_for_status()  # 檢查是否有 HTTP 錯誤發生
-            response.json()
-            result.append(response.json())  # 返回響應內容
+            response = requests.get(url, headers=headers, timeout=timeout)  # Pass timeout to the request
+            response.raise_for_status()  # Check for HTTP errors
+            result.append(response.json())  # Return the response content
+    except requests.Timeout:
+        print("Timeout occurred")
+        return "Timeout occurred"
     except requests.RequestException as e:
-        return str(e)  # 返回錯誤信息
+        print("An error occurred:", e)
+        return str(e)  # Return error message
     return result
