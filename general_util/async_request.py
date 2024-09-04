@@ -16,10 +16,10 @@ async def fetch_data(session, url, headers):
             return await response.json()
     except asyncio.TimeoutError:
         print("error", f"Timeout occurred for {url}")
-        return {"error": f"Timeout occurred for {url}"}
+        raise asyncio.TimeoutError
     except Exception as e:
         print("error", f"An error occurred while fetching {url}: {e}")
-        return {"error": f"An error occurred while fetching {url}: {e}"}
+        raise e
 
 
 def sync_fetch(urls: list[str], headers: dict = None, timeout: int = 5):
@@ -31,8 +31,8 @@ def sync_fetch(urls: list[str], headers: dict = None, timeout: int = 5):
             result.append(response.json())  # Return the response content
     except requests.Timeout:
         print("Timeout occurred")
-        return "Timeout occurred"
+        raise requests.Timeout
     except requests.RequestException as e:
         print("An error occurred:", e)
-        return str(e)  # Return error message
+        raise e
     return result

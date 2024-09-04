@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='general_util',
-    version='0.0.12',
+    version='0.0.13',
     packages=['general_util', 'general_util.log', 'general_util.log.proto'],
     install_requires=[
         'aiohttp>=3.10.3',
