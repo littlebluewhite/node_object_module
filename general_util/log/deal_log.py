@@ -59,7 +59,7 @@ class DealSystemLog:
         else:
             url_path = self.request.url.path.split("/")
             if len(url_path) < 5:
-                return "error", "error", "error"
+                return "UNKNOWN", "UNKNOWN", "UNKNOWN"
             else:
                 return url_path[2], url_path[3], url_path[4]
 

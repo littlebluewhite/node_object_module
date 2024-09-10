@@ -5,6 +5,6 @@ url_module_mapping = {
 
 status_code_rules = {
     "401": {"message": "Unauthorized", "message_code": "401"},
+    "403": {"message": "Forbidden", "message_code": "403"},
     "422": {"message": "Unprocessable Entity", "message_code": "422"},
-    "500": {"message": "Internal Server Error", "message_code": "500"},
 }
