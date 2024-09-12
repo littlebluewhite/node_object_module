@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 class SQLOperate:
     def __init__(self, exc):
         self.exc = exc
-        self.null_set = {-999999, ""}
+        self.null_set = {-999999, "null"}
 
     def create_multiple_sql_data(self, db: Session, create_list: list, sql_model) -> list:
         try:
