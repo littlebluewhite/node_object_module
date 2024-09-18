@@ -29,7 +29,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
     # reload redis_db table from sql for INITIAL
     def initial_redis_data(self, db: Session):
         # sql 取資料
-        sql_data = SQLOperate.get_all_sql_data(db, self.sql_model)
+        sql_data = self.get_all_sql_data(db, self.sql_model)
         self.write_to_redis("count", self.module.name, len(sql_data))
         for table in self.redis_tables:
             # 清除redis表

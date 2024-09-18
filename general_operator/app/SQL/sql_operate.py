@@ -4,6 +4,7 @@ from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import UnmappedInstanceError
+from .database import Base
 
 
 class SQLOperate:
@@ -37,11 +38,31 @@ class SQLOperate:
                      sql_field: str = "id", check_data_list: bool = True) -> list:
         data_list = db.query(sql_model).filter(getattr(sql_model, sql_field).in_(field_value_set)).all()
         if not data_list and check_data_list:
-            raise self.exc(status_code=486, message=f"one or more {sql_field} value are not in {field_value_set}", message_code=3)
+            raise self.exc(status_code=486, message=f"one or more {sql_field} value are not in {field_value_set}",
+                           message_code=3)
         return data_list
 
-    @staticmethod
-    def get_all_sql_data(db: Session, sql_model) -> list:
+    def custom_jsonable_encoder(self, obj, depth: int, current_depth: int = 0):
+        if isinstance(obj, dict):
+            if current_depth >= depth:
+                return {}
+            return {key: self.custom_jsonable_encoder(value, depth, current_depth + 1) for key, value in obj.items()}
+        if isinstance(obj, list):
+            if current_depth >= depth:
+                return []
+            return [self.custom_jsonable_encoder(item, depth, current_depth + 1) for item in obj]
+        if isinstance(obj, BaseModel):
+            keyValue = obj.dict()
+            return self.custom_jsonable_encoder(keyValue, depth, current_depth)
+        if isinstance(obj, Base):
+            data = vars(obj)
+            if data.get("_sa_instance_state") is not None:
+                del data["_sa_instance_state"]
+            return self.custom_jsonable_encoder(data, depth, current_depth)
+        # Use FastAPI's default jsonable_encoder for other types
+        return jsonable_encoder(obj)
+
+    def get_all_sql_data(self, db: Session, sql_model) -> list:
         skip: int = 0
         limit: int = 500
         result = list()
@@ -52,7 +73,7 @@ class SQLOperate:
                 skip += limit
             else:
                 break
-        return [jsonable_encoder(i) for i in result]
+        return [self.custom_jsonable_encoder(i, 8) for i in result]
 
     def update_multiple_sql_data(self, db: Session, update_list: list, sql_model):
         update_data_dict = dict()
@@ -65,7 +86,8 @@ class SQLOperate:
                 update_data_id_set.add(update_data.id)
             sql_data_list = db.query(sql_model).filter(sql_model.id.in_({i.id for i in update_list})).all()
             if len(sql_data_list) != len(update_data_id_set):
-                raise self.exc(status_code=486, message=f"id: one or many of {update_data_id_set} is not exist", message_code=4)
+                raise self.exc(status_code=486, message=f"id: one or many of {update_data_id_set} is not exist",
+                               message_code=4)
             for sql_data in sql_data_list:
                 update_data = update_data_dict[getattr(sql_data, "id")]
                 for item in update_data:
@@ -87,7 +109,8 @@ class SQLOperate:
             else:
                 raise self.exc(status_code=486, message="Unrecognized SQL error", message_code=1)
         except UnmappedInstanceError:
-            raise self.exc(status_code=486, message=f"id: one or more of {update_data_id_set} is not exist", message_code=2)
+            raise self.exc(status_code=486, message=f"id: one or more of {update_data_id_set} is not exist",
+                           message_code=2)
 
     def delete_multiple_sql_data(self, db: Session, id_set: set, sql_model):
         try:
