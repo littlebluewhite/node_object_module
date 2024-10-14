@@ -17,7 +17,7 @@ class SQLOperate:
                 if isinstance(datum, dict):
                     add_list.append(sql_model(**datum))
                 elif isinstance(datum, BaseModel):
-                    add_list.append(sql_model(**datum.dict()))
+                    add_list.append(sql_model(**datum.model_dump()))
                 db.add_all(add_list)
             db.flush()
             result = list()
@@ -40,7 +40,8 @@ class SQLOperate:
                            message_code=3)
         return data_list
 
-    def get_all_sql_data(self, db: Session, sql_model) -> list:
+    @staticmethod
+    def get_all_sql_data(db: Session, sql_model) -> list:
         skip: int = 0
         limit: int = 500
         result = list()
