@@ -2,10 +2,10 @@
 # 2. update redis_db tables which the sql table generate
 # 3, reload the redis_db tables which are related to the sql table
 import redis
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from ..function.encoder import custom_jsonable_encoder
 from ..app.SQL.sql_operate import SQLOperate
 from ..app.influxdb.influxdb import InfluxDB
 from ..app.influxdb.influxdb_operate import InfluxOperate
@@ -40,7 +40,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
     def reload_redis_table(self, db, reload_related_redis_tables, sql_data_list, origin_ref_id_dict=None):
         if origin_ref_id_dict is None:
             origin_ref_id_dict = dict()
-        dict_data_list = jsonable_encoder(sql_data_list)
+        dict_data_list = custom_jsonable_encoder(sql_data_list, 8)
         for key in reload_related_redis_tables:
             if key == "self_field":
                 for table in reload_related_redis_tables["self_field"]:
@@ -101,7 +101,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
         sql_data_list = self.create_sql(db, data_list)
         self.update_redis_table(sql_data_list)
         self.reload_redis_table(db, self.reload_related_redis_tables, sql_data_list)
-        return jsonable_encoder(sql_data_list)
+        return custom_jsonable_encoder(sql_data_list, 8)
 
     def update_data(self, db: Session, update_list: list) -> list:
         # 取得更新前的self reference id
@@ -122,7 +122,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
         # 重寫redis相關表
         self.reload_redis_table(
             db, self.reload_related_redis_tables, sql_data_list, original_ref_id_dict)
-        return jsonable_encoder(sql_data_list)
+        return custom_jsonable_encoder(sql_data_list, 8)
 
     def delete_data(self, db: Session, id_set: set[int]) -> str:
         data_list = self.delete_sql(db, id_set)

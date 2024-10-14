@@ -1,11 +1,9 @@
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from .database import Base
-
+from ...function.encoder import custom_jsonable_encoder
 
 class SQLOperate:
     def __init__(self, exc):
@@ -42,26 +40,6 @@ class SQLOperate:
                            message_code=3)
         return data_list
 
-    def custom_jsonable_encoder(self, obj, depth: int, current_depth: int = 0):
-        if isinstance(obj, dict):
-            if current_depth >= depth:
-                return {}
-            return {key: self.custom_jsonable_encoder(value, depth, current_depth + 1) for key, value in obj.items()}
-        if isinstance(obj, list):
-            if current_depth >= depth:
-                return []
-            return [self.custom_jsonable_encoder(item, depth, current_depth + 1) for item in obj]
-        if isinstance(obj, BaseModel):
-            keyValue = obj.dict()
-            return self.custom_jsonable_encoder(keyValue, depth, current_depth)
-        if isinstance(obj, Base):
-            data = vars(obj)
-            if data.get("_sa_instance_state") is not None:
-                del data["_sa_instance_state"]
-            return self.custom_jsonable_encoder(data, depth, current_depth)
-        # Use FastAPI's default jsonable_encoder for other types
-        return jsonable_encoder(obj)
-
     def get_all_sql_data(self, db: Session, sql_model) -> list:
         skip: int = 0
         limit: int = 500
@@ -73,7 +51,7 @@ class SQLOperate:
                 skip += limit
             else:
                 break
-        return [self.custom_jsonable_encoder(i, 8) for i in result]
+        return [custom_jsonable_encoder(i, 8) for i in result]
 
     def update_multiple_sql_data(self, db: Session, update_list: list, sql_model):
         update_data_dict = dict()
