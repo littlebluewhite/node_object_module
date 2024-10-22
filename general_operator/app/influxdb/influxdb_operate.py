@@ -1,3 +1,4 @@
+import functools
 import influxdb_client
 from influxdb_client.client.write_api import WriteOptions
 from influxdb_client.rest import ApiException
@@ -26,16 +27,18 @@ class InfluxOperate:
         self.reader = self.influxdb.client.query_api()
 
 
-    def exception_handler(self, func):
-        def wrapper(*args, **kwargs):
+    @staticmethod
+    def exception_handler(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
             try:
-                return func(*args, **kwargs)
+                return func(self, *args, **kwargs)
             except NewConnectionError:
-                raise self.exc(status_code=488, message="influxdb connect fail", message_code=1)
+                raise self.exc(status_code=488, message="InfluxDB connection failed", message_code=1)
             except ApiException as e:
                 raise self.exc(status_code=488, message=str(e.message).replace("\n", ""), message_code=e.status)
-            except Exception:
-                raise self.exc(status_code=488, message='unknown error', message_code=99)
+            except Exception as e:
+                raise self.exc(status_code=488, message='Unknown error', message_code=99)
         return wrapper
 
     def change_bucket(self, bucket: str):
