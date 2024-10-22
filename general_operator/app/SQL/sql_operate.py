@@ -27,10 +27,7 @@ class SQLOperate:
             return result
         except IntegrityError as e:
             code, msg = e.orig.args
-            if code == 1452:
-                raise self.exc(status_code=486, message=msg, message_code=1452)
-            elif code == 1062:
-                raise self.exc(status_code=486, message=msg, message_code=1452)
+            raise self.exc(status_code=486, message=msg, message_code=code)
 
     def get_sql_data(self, db: Session, sql_model, field_value_set: set,
                      sql_field: str = "id", check_data_list: bool = True) -> list:
@@ -83,10 +80,7 @@ class SQLOperate:
             return sql_data_list
         except IntegrityError as e:
             code, msg = e.orig.args
-            if code in [1062, 1406, 1452]:
-                raise self.exc(status_code=486, message=msg, message_code=code)
-            else:
-                raise self.exc(status_code=486, message="Unrecognized SQL error", message_code=1)
+            raise self.exc(status_code=486, message=msg, message_code=code)
         except UnmappedInstanceError:
             raise self.exc(status_code=486, message=f"id: one or more of {update_data_id_set} is not exist",
                            message_code=2)
@@ -98,8 +92,7 @@ class SQLOperate:
             db.flush()
         except IntegrityError as e:
             code, msg = e.orig.args
-            if code == 1451:
-                raise self.exc(status_code=486, message=msg, message_code=code)
+            raise self.exc(status_code=486, message=msg, message_code=code)
         except UnmappedInstanceError:
             raise self.exc(status_code=486, message=f"id: one or more of {str(id_set)} is not exist", message_code=2)
 

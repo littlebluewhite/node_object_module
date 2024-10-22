@@ -1,7 +1,10 @@
 import influxdb_client
 from influxdb_client.client.write_api import WriteOptions
+from influxdb_client.rest import ApiException
+from urllib3.exceptions import NewConnectionError
 
 from .influxdb import InfluxDB
+
 
 
 class InfluxOperate:
@@ -22,6 +25,19 @@ class InfluxOperate:
                 exponential_base=2))
         self.reader = self.influxdb.client.query_api()
 
+
+    def exception_handler(self, func):
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except NewConnectionError:
+                raise self.exc(status_code=488, message="influxdb connect fail", message_code=1)
+            except ApiException as e:
+                raise self.exc(status_code=488, message=str(e.message).replace("\n", ""), message_code=e.status)
+            except Exception:
+                raise self.exc(status_code=488, message='unknown error', message_code=99)
+        return wrapper
+
     def change_bucket(self, bucket: str):
         self.__bucket = bucket
 
@@ -34,6 +50,7 @@ class InfluxOperate:
     def show_org(self):
         return self.__org
 
+    @exception_handler
     def write(self, p: influxdb_client.Point | list[influxdb_client.Point]):
         # ex:
         # p = influxdb_client.Point(
@@ -42,6 +59,7 @@ class InfluxOperate:
         #     .field("value", str(value))
         self.writer.write(bucket=self.__bucket, org=self.__org, record=p)
 
+    @exception_handler
     def query(self, q: str):
         # ex:
         # query = f'''from(bucket:"node_object")
