@@ -25,6 +25,7 @@ class RedisDB:
         return RedisCluster(startup_nodes=nodes,
                             username=self.username,
                             password=self.password,
+                            socket_timeout=5,
                             decode_responses=self.decode_responses)
 
     def __new_single(self):
@@ -33,6 +34,7 @@ class RedisDB:
                            db=self.db,
                            username=self.username,
                            password=self.password,
+                           socket_timeout=5,
                            decode_responses=self.decode_responses)
 
     def __is_redis_cluster(self):

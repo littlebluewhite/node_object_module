@@ -30,6 +30,8 @@ class RedisOperate(OperateFunction):
                     raise self.exc(status_code=487, message=e, message_code=3)
             except json.JSONDecodeError:
                 raise self.exc(status_code=487, message="redis operation json decode error", message_code=4)
+            except Exception as e:
+                raise self.exc(status_code=487, message=e, message_code=999)
 
         return wrapper
 

@@ -17,7 +17,13 @@ class SQLOperate:
                 if isinstance(datum, dict):
                     add_list.append(sql_model(**datum))
                 elif isinstance(datum, BaseModel):
-                    add_list.append(sql_model(**datum.model_dump()))
+                    try:
+                        # pydantic 2.x.x version
+                        add_list.append(sql_model(**datum.model_dump()))
+                    except Exception as e:
+                        # pydantic 1.x.x version
+                        print(e)
+                        add_list.append(sql_model(**datum.dict()))
                 db.add_all(add_list)
             db.flush()
             result = list()
