@@ -77,7 +77,7 @@ class GeneralOperate(RedisOperate, SQLOperate, InfluxOperate):
         return sql_data_list
 
     def read_all_data_from_sql(self, db) -> list:
-        return SQLOperate.get_all_sql_data(db, self.sql_model)
+        return SQLOperate.get_all_sql_data(self, db, self.sql_model)
 
     def read_data_from_sql_by_id_set(self, db, id_set: set) -> list:
         return SQLOperate.get_sql_data(self, db, self.sql_model, id_set)
