@@ -6,13 +6,13 @@ from redis.cluster import RedisCluster
 
 
 class RedisDB:
-    def __init__(self, redis_config, decode_responses=False, socket_timeout=5):
+    def __init__(self, redis_config, decode_responses=False):
         self.host = redis_config["host"]
         self.db = redis_config["db"]
         self.username = redis_config["user"]
         self.password = redis_config["password"]
         self.decode_responses = decode_responses
-        self.socket_timeout = socket_timeout
+        self.socket_timeout = redis_config.get("socket_timeout", 5)
         self.is_cluster = self.__is_redis_cluster()
 
     def redis_client(self):
