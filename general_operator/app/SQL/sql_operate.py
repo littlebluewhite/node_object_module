@@ -1,4 +1,6 @@
 import functools
+import psycopg2
+import pymysql
 from pydantic import BaseModel
 from sqlalchemy import delete
 from sqlalchemy.exc import DBAPIError
@@ -19,8 +21,17 @@ class SQLOperate:
             try:
                 return func(self, *args, **kwargs)
             except DBAPIError as e:
-                code, msg = e.orig.args
-                raise self.exc(status_code=486, message=msg, message_code=code)
+                if isinstance(e.orig, psycopg2.Error):
+                    pg_error = e.orig
+                    message = pg_error.pgerror.replace("\n", " ").replace("\r", " ")
+                    if pg_error.pgcode:
+                        code = pg_error.pgcode
+                    else:
+                        code = 1
+                    raise self.exc(status_code=489, message=message, message_code=code)
+                elif isinstance(e.orig, pymysql.Error):
+                    code, msg = e.orig.args
+                    raise self.exc(status_code=486, message=msg, message_code=code)
             except UnmappedInstanceError:
                 raise self.exc(status_code=486, message=f"id: one or more of ids is not exist",
                                message_code=2)
@@ -40,7 +51,7 @@ class SQLOperate:
                     # pydantic 1.x.x version
                     print(e)
                     add_list.append(sql_model(**datum.dict()))
-            db.add_all(add_list)
+        db.add_all(add_list)
         db.flush()
         result = list()
         for datum in add_list:

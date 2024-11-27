@@ -19,13 +19,13 @@ class DealSystemLog:
         if code_rules is not None:
             self.code_rules = code_rules
 
-    async def deal(self, system_log_g_server):
+    async def deal(self, system_log_g_server, timeout=5.0):
         log = self.__create_system_log()
-        print("write log: ", self.__write_log_g(log, system_log_g_server))
+        print("write log: ", self.__write_log_g(log, system_log_g_server, timeout=timeout))
 
-    async def deal_r(self, system_log_r_server):
+    async def deal_r(self, system_log_r_server, timeout=5.0):
         log = self.__create_system_log()
-        print("write log: ", self.__write_log_r(log, system_log_r_server))
+        print("write log: ", self.__write_log_r(log, system_log_r_server, timeout=timeout))
 
 
     def __create_system_log(self):
@@ -80,7 +80,7 @@ class DealSystemLog:
         return message, message_code
 
     @staticmethod
-    def __write_log_g(log, system_log_g_server):
+    def __write_log_g(log, system_log_g_server, timeout=5.0):
         with grpc.insecure_channel(f"{system_log_g_server}") as channel:
             stub = system_log_pb2_grpc.SystemLogServiceStub(channel)
             request = system_log_pb2.LogRequest(
@@ -99,10 +99,10 @@ class DealSystemLog:
                 query_params=log.query_params,
                 web_path=log.web_path
             )
-            return stub.WriteLog(request)
+            return stub.WriteLog(request, timeout=timeout)
 
     @staticmethod
-    def __write_log_r(log, system_log_r_server):
+    def __write_log_r(log, system_log_r_server, timeout=5.0):
         body = {
             "timestamp": log.timestamp,
             "module": log.module,
@@ -124,6 +124,6 @@ class DealSystemLog:
             'accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        response = requests.post(url, json=body, headers=headers)
+        response = requests.post(url, json=body, headers=headers, timeout=timeout)
         return response
 
