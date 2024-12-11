@@ -23,11 +23,15 @@ class SQLOperate:
             except DBAPIError as e:
                 if isinstance(e.orig, psycopg2.Error):
                     pg_error = e.orig
-                    message = pg_error.pgerror.replace("\n", " ").replace("\r", " ")
+                    if pg_error.pgerror:
+                        message = pg_error.pgerror.replace("\n", " ").replace("\r", " ")
+                    else:
+                        message = str(pg_error).replace("\n", " ").replace("\r", " ")
                     if pg_error.pgcode:
                         code = pg_error.pgcode
                     else:
                         code = 1
+                        message = "postgres connection error: " + message
                     raise self.exc(status_code=489, message=message, message_code=code)
                 elif isinstance(e.orig, pymysql.Error):
                     code, msg = e.orig.args
