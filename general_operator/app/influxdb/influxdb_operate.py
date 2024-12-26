@@ -2,7 +2,7 @@ import functools
 import influxdb_client
 from influxdb_client.client.write_api import WriteOptions
 from influxdb_client.rest import ApiException
-from urllib3.exceptions import NewConnectionError, ConnectTimeoutError
+from urllib3.exceptions import NewConnectionError, TimeoutError
 from .influxdb import InfluxDB
 
 
@@ -34,7 +34,7 @@ class InfluxOperate:
                 return func(self, *args, **kwargs)
             except NewConnectionError:
                 raise self.exc(status_code=488, message="InfluxDB connection failed", message_code=1)
-            except ConnectTimeoutError:
+            except TimeoutError:
                 raise self.exc(status_code=488, message="InfluxDB connection timeout", message_code=2)
             except ApiException as e:
                 raise self.exc(status_code=488, message=str(e.message).replace("\n", ""), message_code=e.status)
