@@ -36,6 +36,11 @@ class DealSystemLog:
         self.response.init_headers(response_headers)
         message, message_code = self.__get_message(response_headers)
         t = time.time()
+        # get account
+        account = request_headers.get("account", "")
+        response_account = response_headers.get("account", "")
+        if response_account:
+            account = response_account
         return Log(
             timestamp= t,
             module=module,
@@ -46,7 +51,7 @@ class DealSystemLog:
             message_code=message_code,
             message=message,
             response_size=response_headers.get("content-length", ""),
-            account=request_headers.get("account", ""),
+            account=account,
             ip=self.request.client.host,
             api_url=self.request.url.path,
             query_params=self.request.url.query,
