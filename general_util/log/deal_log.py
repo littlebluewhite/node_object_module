@@ -38,9 +38,9 @@ class DealSystemLog:
         t = time.time()
         # get account
         account = request_headers.get("account", "")
-        response_account = response_headers.get("account", "")
-        if response_account:
-            account = response_account
+        state_account = getattr(self.request.state, "account", None)
+        if state_account:
+            account = state_account
         return Log(
             timestamp= t,
             module=module,
