@@ -52,7 +52,7 @@ class DealSystemLog:
             message=message,
             response_size=response_headers.get("content-length", ""),
             account=account,
-            ip=self.request.client.host,
+            ip=request_headers.get("x-forwarded-for", self.request.client.host),
             api_url=self.request.url.path,
             query_params=self.request.url.query,
             web_path=request_headers.get("web-path", "")
