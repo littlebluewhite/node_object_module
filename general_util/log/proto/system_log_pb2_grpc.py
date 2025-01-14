@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import system_log_pb2 as function_dot_log_dot_proto_dot_system__log__pb2
+from . import system_log_pb2 as server_dot_proto_dot_system__log__pb2
 
 GRPC_GENERATED_VERSION = '1.65.4'
 GRPC_VERSION = grpc.__version__
@@ -20,7 +20,7 @@ except ImportError:
 if _version_not_supported:
     warnings.warn(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in function/log/proto/system_log_pb2_grpc.py depends on'
+        + f' but the generated code in server/proto/system_log_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -41,8 +41,8 @@ class SystemLogServiceStub(object):
         """
         self.WriteLog = channel.unary_unary(
                 '/SystemLogService/WriteLog',
-                request_serializer=function_dot_log_dot_proto_dot_system__log__pb2.LogRequest.SerializeToString,
-                response_deserializer=function_dot_log_dot_proto_dot_system__log__pb2.LogResponse.FromString,
+                request_serializer=server_dot_proto_dot_system__log__pb2.LogRequest.SerializeToString,
+                response_deserializer=server_dot_proto_dot_system__log__pb2.LogResponse.FromString,
                 _registered_method=True)
 
 
@@ -60,8 +60,8 @@ def add_SystemLogServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'WriteLog': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteLog,
-                    request_deserializer=function_dot_log_dot_proto_dot_system__log__pb2.LogRequest.FromString,
-                    response_serializer=function_dot_log_dot_proto_dot_system__log__pb2.LogResponse.SerializeToString,
+                    request_deserializer=server_dot_proto_dot_system__log__pb2.LogRequest.FromString,
+                    response_serializer=server_dot_proto_dot_system__log__pb2.LogResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -89,8 +89,8 @@ class SystemLogService(object):
             request,
             target,
             '/SystemLogService/WriteLog',
-            function_dot_log_dot_proto_dot_system__log__pb2.LogRequest.SerializeToString,
-            function_dot_log_dot_proto_dot_system__log__pb2.LogResponse.FromString,
+            server_dot_proto_dot_system__log__pb2.LogRequest.SerializeToString,
+            server_dot_proto_dot_system__log__pb2.LogResponse.FromString,
             options,
             channel_credentials,
             insecure,

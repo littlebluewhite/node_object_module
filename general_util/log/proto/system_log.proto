@@ -13,12 +13,14 @@ message LogRequest {
   string status_code = 6;
   string message_code = 7;
   string message = 8;
-  string response_size = 9;
-  string account = 10;
-  string ip = 11;
-  string api_url = 12;
-  string query_params = 13;
-  string web_path = 14;
+  string request_body = 9;
+  string response_size = 10;
+  string response_body = 11;
+  string account = 12;
+  string ip = 13;
+  string api_url = 14;
+  string query_params = 15;
+  string web_path = 16;
 }
 
 message LogResponse {

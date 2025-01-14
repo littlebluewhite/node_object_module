@@ -2,16 +2,20 @@ import time
 import grpc
 import requests
 from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 from .data import url_module_mapping, status_code_rules
 from .system_log_schema import Log
 from .proto import system_log_pb2, system_log_pb2_grpc
 
 
 class DealSystemLog:
-    def __init__(self, request: Request, response: JSONResponse, url_mapping:dict=None, code_rules=None):
+    def __init__(self, request: Request, response: Response,
+                 request_body: str = "", response_body: str = "",
+                 url_mapping: dict = None, code_rules=None):
         self.request = request
         self.response = response
+        self.request_body = request_body
+        self.response_body = response_body
         self.url_mapping = url_module_mapping
         self.code_rules = status_code_rules
         if url_mapping is not None:
@@ -27,10 +31,9 @@ class DealSystemLog:
         log = self.__create_system_log()
         print("write log: ", self.__write_log_r(log, system_log_r_server, timeout=timeout))
 
-
     def __create_system_log(self):
         response_headers: dict = dict(self.response.headers)
-        request_headers: dict  = dict(self.request.headers)
+        request_headers: dict = dict(self.request.headers)
         module, submodule, item = self.__get_module_submodule_item()
         response_headers["check_header"] = "check_value"
         self.response.init_headers(response_headers)
@@ -42,7 +45,7 @@ class DealSystemLog:
         if state_account:
             account = state_account
         return Log(
-            timestamp= t,
+            timestamp=t,
             module=module,
             submodule=submodule,
             item=item,
@@ -50,7 +53,9 @@ class DealSystemLog:
             status_code=f"{self.response.status_code}",
             message_code=message_code,
             message=message,
+            request_body=self.request_body,
             response_size=response_headers.get("content-length", ""),
+            response_body=self.response_body,
             account=account,
             ip=request_headers.get("x-forwarded-for", self.request.client.host),
             api_url=self.request.url.path,
@@ -131,4 +136,3 @@ class DealSystemLog:
         }
         response = requests.post(url, json=body, headers=headers, timeout=timeout)
         return response
-

@@ -10,7 +10,9 @@ class Log(BaseModel):
     status_code: str
     message_code: str = ""
     message: str = ""
+    request_body: str = ""
     response_size: str
+    response_body: str = ""
     account: str = ""
     ip: str
     api_url: str
